@@ -1,0 +1,29 @@
+{
+  "summary": "Checked the iteration-4 MEDIUM fix (localEditEpoch in sync.ts) with Playwright (390x844) against the public URL. page.route held, delayed or faked GET/PUT requests. All 4 requested scenarios PASS. (1) A poll GET started at t=12.8s and was held. The user advanced b4 at 13.35s, and the PUT finished at 13.92s. The GET was then released at 14.61s with stale data (b4 'Da Impastare' plus a fake TEST_STALE note). It was dropped: the UI kept 'In Puntata', no stale note appeared, and the backend matched. Before the fix this response would have been applied, because the stale body differed from the poll's old state. (2) A normal advance saved in about 100ms and survived a later poll; UI and backend both showed 'In Cella' and the badge read 'Cloud sincronizzato'. (3) Two quick advances while the PUT was delayed 1.5s caused 2 PUTs, one after the other. Both persisted ('In Forno') and survived a later poll. (4) Reset Demo with a poll GET already in flight: the stale GET (b4 'In Forno' plus the stale note) was dropped after the reset finished, and the UI and backend both showed the demo data. An extra edge test found a remaining LOW race: a poll that STARTS while the reset PUT is still in flight is applied when it returns after the reset finishes. The stale note appeared in the UI. Backend state was restored from the pre-test snapshot.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Reset Demo vs poll started during reset PUT", "issue": "LOW edge race. resetRemote bumps localEditEpoch BEFORE its PUT and does not set saving or any other flag while the PUT is in flight. The 12s poll interval can fire during the PUT. pollRemote passes the guard and captures the already-bumped epoch, so if the GET returns after the reset finishes, its pre-reset data overwrites the fresh demo state in the UI. Reproduced: reset PUT delayed 6s, poll GET started 2.8s into it and was released after the PUT finished; the stale note appeared. Server data stays correct, and the next poll heals the UI within about 12s. Reference: /app/frontend/src/utils/sync.ts:145-159", "affected_testIDs": ["reset-demo", "sync-badge"]}
+    ],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_5.json"],
+  "action_items": [
+    "LOW: In resetRemote (sync.ts:145), protect the reset PUT window. Either set `saving = true` around the PUT (reset it in finally), or bump `localEditEpoch += 1` again after the PUT await (in finally). Any poll that started during the reset PUT is then discarded.",
+    "LOW (carried from iteration 4): resetRemote does not wait for or cancel an in-flight flushPending PUT. An older PUT can land after the reset PUT and overwrite the demo state on the server."
+  ],
+  "critical_code_review_comments": [
+    "localEditEpoch is checked correctly: it is captured before the GET and compared after it, alongside the pending/saving/retryTimer checks, and it is bumped in both enqueueSave and resetRemote.",
+    "pollRemote compares against `current` from the interval's closure, which can be out of date. This is harmless now that the epoch guard exists, but passing a ref to the latest state would be cleaner.",
+    "No deprecated Expo packages (expo-av, expo-barcode-scanner, expo-background-fetch) found in the reviewed sync code."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend only)", "frontend": "100% of requested scenarios (4/4); 1 extra LOW edge race found"},
+  "seed_data_creation": "None. Took a snapshot of /api/panificio/state before testing and PUT it back afterwards (verified identical). The TEST_STALE note was only injected into intercepted GET responses and never reached the DB.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use page.route('**/api/panificio/state'). To hold a poll GET: call route.fetch(), inject a TEST_STALE note, await an asyncio.Event, then fulfill. Poll interval is 12s and restarts on every state change. To hit the reset-PUT window: wait about 8.5s after the last state change, delay the reset PUT 6s (fetch aborts at 8s), and the poll fires inside it. Read the stage by walking up from [data-testid=advance-b4]. Reset uses window.confirm (accept the dialog). Snapshot and restore backend state.",
+  "rca_of_issue": "The iteration-4 race is fixed: the epoch bump in enqueueSave makes any GET issued before the edit invalid. The remaining edge: in resetRemote the epoch is bumped only once, before the PUT. A poll starting after the bump but before the PUT completes captures the new epoch, and nothing marks reset as busy, so its stale response passes all guards once the reset finishes. Mitigation: bump the epoch again after the PUT, or treat reset as `saving`."
+}

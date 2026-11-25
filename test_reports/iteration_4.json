@@ -1,0 +1,29 @@
+{
+  "summary": "Checked the iteration-3 P0 lost-update fix in sync.ts with Playwright (390x844) against the public URL. page.route delayed, aborted or faked PUT/GET requests. All requested scenarios PASS. (1) PUT delayed 1.5s, two quick advance-b4 taps: exactly 2 PUTs ran one after the other with no overlap (In Puntata, then In Cella, the 2nd started right after the 1st finished). Backend and UI both ended at 'In Cella', and a later poll did not revert it. (2) The badge stayed 'Salvataggio...' until the 2nd PUT finished and flipped to 'Cloud sincronizzato' only then (0 early samples). (3) A stale GET (with a fake other-tablet change) returned while the PUT was still in flight and was ignored; the edit was kept. (4) Regressions: a single online advance saved in ~100ms. Offline (PUT aborted) showed 'Offline', then the 10s retry flushed the edit and the badge went back to synced. Reset demo updated the UI to the demo state and the badge to synced; its PUT was intercepted and faked so the real DB was not overwritten. One remaining MEDIUM edge race was found (see rca_of_issue). No deprecated Expo packages detected. Backend state was restored from the pre-test snapshot.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "sync.ts pollRemote", "issue": "Remaining edge race: a GET that the server answered BEFORE a local PUT, but whose response arrives AFTER that PUT has finished, passes the post-fetch re-check (pending=null, saving=false, retryTimer=null). It is then applied and reverts the local edit. Reproduced: the GET read the server, then its response was delayed 4s. Meanwhile advance-b4 (In Puntata->In Cella) was tapped and the PUT finished. When the GET landed, the UI reverted b4 to 'In Puntata' while the backend had 'In Cella'. It heals on the next poll (12s), but any edit made in that window would PUT the reverted state and lose the earlier edit for good. Reference: /app/frontend/src/utils/sync.ts:126-136", "testID": "advance-b4", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/ui/iter4_s1.jpeg", "/app/test_reports/ui/iter4_s3.jpeg", "/app/test_reports/ui/iter4_s3b.jpeg"],
+  "action_items": [
+    "MEDIUM: Add a monotonic `localVersion` counter in sync.ts, incremented in enqueueSave (and resetRemote). In pollRemote, read it before fetchJson and return null if it changed after the await, in addition to the existing pending/saving/retryTimer re-check. This drops any GET that started before a local edit.",
+    "LOW: resetRemote does not wait for or cancel an in-flight flushPending PUT. An older in-flight PUT can still land after the reset PUT and overwrite the demo state on the server. Consider waiting for `saving` to clear, or using the version counter so an old PUT result never wins."
+  ],
+  "critical_code_review_comments": [
+    "sync.ts:85-113 the single-in-flight plus identity-check re-flush is correct; confirmed live with sequential PUTs and no lost edits.",
+    "sync.ts:131 the post-fetch re-check covers GETs that return while saving/pending, but not GETs that return after the save finished (needs a version/generation check).",
+    "sync.ts:143-156 resetRemote ignores the `saving` flag (possible out-of-order PUT)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "7/8 scenarios pass (all 4 requested pass; 1 extra edge race found)"},
+  "seed_data_creation": "None. Batch b4 was advanced during tests, then the full backend state was restored from a pre-test GET snapshot via PUT (b4 back to 'Da Impastare'). The reset-demo PUT was intercepted with route.fulfill, so the real DB was never reset.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use page.route('**/api/panificio/state') to delay, abort or fake PUT/GET. For a stale-GET test, call route.fetch() first, then sleep, then fulfill. Read stage by walking up from [data-testid=advance-<id>] to a node whose first innerText line is a stage name. The poll interval is 12s and restarts on every state change. Badge testID: sync-badge. Reset uses window.confirm (accept the dialog). Snapshot the GET state before tests and PUT it back after.",
+  "rca_of_issue": "Iteration-3 P0 is FIXED: flushPending now holds a `saving` lock and clears pending only when `pending === payload`, otherwise it re-flushes. Verified: 2 PUTs ran one after the other and the final state persisted. Residual race: pollRemote's guard is state-based, not version-based. A GET answered before the PUT but arriving after it finished sees clean flags and applies stale data. Mitigation: a generation counter (see action_items)."
+}

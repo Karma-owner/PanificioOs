@@ -1,0 +1,30 @@
+{
+  "summary": "Re-tested the iteration-2 P0 fix (pollRemote guard on pending/retryTimer) with Playwright at 390x844 against the public URL. All 4 requested scenarios PASS: (1) PUT aborted and GET ok, advance-b4 Da Impastare->In Puntata held through about 40s and 5 failed PUT retries. Zero GETs fired while the edit was pending (poll correctly skipped), so no revert. (2) Badge stayed 'Offline' the whole time and never flipped to 'Cloud sincronizzato' too early. (3) After PUT was unblocked, the retry flushed (put_ok=1), the badge went to 'Cloud sincronizzato', the next poll GET ran with no change, and the backend b4 stage was 'In Puntata'. (4) Regression: an online advance (In Puntata->In Cella) was saved and survived a reload. Also checked: a poll GET in flight (4s delay) while the user edits does not revert the edit. NEW HIGH bug found in the same sync module: an edit made while an earlier PUT is in flight is silently lost (details in rca_of_issue). No deprecated Expo packages detected. Backend state was restored to the pre-test snapshot afterwards.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "sync.ts flushPending", "issue": "REPRODUCED: an edit made while an earlier PUT is in flight is lost. With PUT delayed 1s: click advance-b4 (In Cella->Formatura), then click again 1.4s later (Formatura->In Forno). Only ONE PUT was sent. The backend stayed at 'Formatura' while the UI showed 'In Forno', and the badge said 'Cloud sincronizzato'. The next poll (12s) then reverted the UI to 'Formatura', so the 2nd edit was gone for good. Cause: flushPending sets `pending = null` unconditionally after the await (line 90), which wipes the newer state that enqueueSave set during the PUT. When the newer edit's saveTimer fires, flushPending sees pending===null and returns. setStatus('online') also runs even though a newer edit is unsaved. Reference: /app/frontend/src/utils/sync.ts:84-100", "testID": "advance-b4", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/ui/iter3_offline_pending.jpeg", "/app/test_reports/ui/iter3_after_online.jpeg", "/app/test_reports/ui/iter3_t3.jpeg"],
+  "action_items": [
+    "HIGH: In flushPending, after a successful PUT only clear pending if it is still the same object: `if (pending === payload) { pending = null; setStatus('online'); } else { void flushPending(); }`. Use an `inFlight` flag so two PUTs never run at once and can't arrive out of order (today a 2nd saveTimer can fire a parallel PUT). Apply the same identity check in the catch/retry branch.",
+    "MINOR: pollRemote checks pending only before the await. Re-check `pending !== null || saveTimer/retryTimer` after fetchJson returns, before calling setStatus('online') or returning remote. Otherwise a GET that is in flight when the user edits can overwrite the edit if the server copy differs from the old `current` (for example, another tablet changed it). The single-device case passed only because the stale remote matched the stale captured `current`.",
+    "MINOR: saveTimer is not cleared or set to null in flushPending. Set `saveTimer = null` when it fires so guards can rely on it."
+  ],
+  "critical_code_review_comments": [
+    "sync.ts:90 `pending = null` runs unconditionally after the await, which causes the lost-update race (confirmed live).",
+    "sync.ts:89 setStatus('online') runs before checking whether newer edits were queued, so the badge misreports the sync state.",
+    "sync.ts:111 the guard is correct for the reported P0, but it is not re-checked after the await (TOCTOU)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (not requested)", "frontend": "5/6 scenarios pass (4/4 requested pass; 1 new race bug)"},
+  "seed_data_creation": "None. Advanced batch b4 during tests, then restored the full backend state from a pre-test GET snapshot via PUT (b4 back to 'Da Impastare').",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Sync tests: use page.route('**/api/panificio/state') to abort or delay PUT/GET. Nav to the kanban with [data-testid=nav-produzione]. Find the b4 stage by walking up from [data-testid=advance-b4] until the element's first innerText line is a stage name. Lost-update repro: PUT delay 1s, click advance-b4, wait 1400ms, click again, count PUTs (expect 2, bug gives 1). Snapshot GET state before and PUT it back after. The poll interval restarts on every state change (useEffect deps [loaded, state]).",
+  "rca_of_issue": "Original P0: FIXED and verified. New bug: flushPending captures payload=pending, awaits the PUT, then sets pending=null without checking whether enqueueSave replaced pending in the meantime. Repro steps are in ui_bugs. Fix: identity-check payload vs pending, use a single-flight PUT, and re-flush if a newer state exists."
+}

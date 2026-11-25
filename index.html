@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)https://flour-slate-%2D9yz073vc.preview.emergentagent.com/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style id="react-native-stylesheet"></style>
+    
+    <meta httpequiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PanificioOS</title>
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  <style data-expo-css-hmr="node_modules__expo_log_box_build_toast_ErrorToast_module_css" data-expo-loader="css">.ANPXsG_container {
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  max-width: 320px;
+  display: flex;
+  position: fixed;
+  left: 10px;
+  right: 10px;
+}
+
+.ANPXsG_toast {
+  border: 1px solid var(--expo-log-color-danger);
+  cursor: pointer;
+  height: 48px;
+  font-family: var(--expo-log-font-family);
+  background-color: #632e2c;
+  border-radius: 6px;
+  flex-direction: row;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 0 10px;
+  transition: background-color .2s;
+  display: flex;
+  overflow: hidden;
+}
+
+@media (hover: hover) {
+  .ANPXsG_toast:hover {
+    background-color: #924340;
+  }
+}
+
+.ANPXsG_message {
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--expo-log-color-label);
+  font-family: var(--expo-log-font-family);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+  padding-left: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  display: block;
+  overflow: hidden;
+}
+
+.ANPXsG_count {
+  background: var(--expo-log-color-danger);
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  min-width: 30px;
+  height: 30px;
+  display: flex;
+}
+
+.ANPXsG_countText {
+  color: var(--expo-log-color-label);
+  font-family: var(--expo-log-font-family);
+  text-align: center;
+  text-shadow: 0 0 3px #333c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.ANPXsG_dismissButton {
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin: -12px -10px -12px -5px;
+  padding: 12px 10px;
+}
+
+.ANPXsG_dismissContent {
+  background-color: #ffffff1a;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  transition: opacity .2s;
+  display: flex;
+}
+
+@media (hover: hover) {
+  .ANPXsG_dismissButton:hover .ANPXsG_dismissContent {
+    opacity: .8;
+  }
+}
+
+.ANPXsG_dismissButton:active .ANPXsG_dismissContent {
+  opacity: .5;
+}
+
+.ANPXsG_dismissIcon {
+  color: #fff;
+  width: 12px;
+  height: 12px;
+}
+</style><style data-expo-css-hmr="node_modules__expo_log_box_build_overlay_Overlay_module_css" data-expo-loader="css">:host {
+  --expo-log-color-border: #313538;
+  --expo-log-color-label: #edeef0;
+  --expo-log-color-background: #111113;
+  --expo-log-secondary-label: #ebebf599;
+  --expo-log-secondary-system-background: #1c1c1f;
+  --expo-log-secondary-system-grouped-background: #18191b;
+  --expo-log-secondary-system-background-hover: #272a2d;
+  --expo-log-color-danger: #ec5e5e;
+  --expo-log-syntax-red: #ec5e5e;
+  --expo-log-syntax-orange: #ffa163;
+  --expo-log-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --expo-log-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@supports (color: color(display-p3 0 0 0)) {
+  :host {
+    --expo-log-secondary-system-grouped-background: color(display-p3 .095 .098 .105);
+    --expo-log-secondary-system-background-hover: color(display-p3 .156 .163 .176);
+    --expo-log-color-danger: color(display-p3 .861 .403 .387);
+    --expo-log-syntax-red: color(display-p3 .861 .403 .387);
+    --expo-log-syntax-orange: color(display-p3 1 .63 .38);
+  }
+}
+
+._6M-EzW_overlayIos {
+  top: 0;
+}
+
+._6M-EzW_overlayAndroid {
+  top: var(--android-safe-area-inset-top, env(safe-area-inset-top));
+}
+
+._6M-EzW_overlayWeb {
+  top: calc(10vh + env(safe-area-inset-top, 2vh));
+}
+
+._6M-EzW_overlay {
+  z-index: 9900;
+  -webkit-font-smoothing: antialiased;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+._6M-EzW_containerTopRadius {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+._6M-EzW_container {
+  --expo-log-max-width: 960px;
+  max-width: var(--expo-log-max-width);
+  background-color: var(--expo-log-color-background);
+  opacity: 0;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  animation: .2s ease-out forwards _6M-EzW_fadeInUp;
+  display: flex;
+  position: relative;
+  overflow-x: hidden;
+  transform: translateY(20px);
+}
+
+._6M-EzW_content {
+  opacity: 0;
+  background-color: var(--expo-log-color-background);
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  animation: .2s ease-out forwards _6M-EzW_fadeInUp;
+  display: flex;
+}
+
+._6M-EzW_scroll {
+  background-color: var(--expo-log-color-background);
+  padding-top: 16px;
+  padding-bottom: calc(var(--expo-log-footer-height) + 1rem);
+  flex-direction: column;
+  flex: 1;
+  gap: .5rem;
+  display: flex;
+  position: relative;
+  overflow: hidden auto;
+}
+
+._6M-EzW_bg {
+  backdrop-filter: blur(10px);
+  pointer-events: all;
+  z-index: -1;
+  opacity: 0;
+  background-color: #000c;
+  animation: .15s ease-out forwards _6M-EzW_data-expo-log-backdrop-fade-in;
+  position: fixed;
+  inset: 0;
+}
+
+._6M-EzW_bgExit {
+  opacity: 1;
+  animation: .15s ease-in forwards _6M-EzW_fadeOut;
+}
+
+._6M-EzW_containerExit {
+  opacity: 1;
+  animation: .15s ease-in forwards _6M-EzW_fadeOutUp;
+  transform: translateY(0);
+}
+
+@keyframes _6M-EzW_data-expo-log-backdrop-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes _6M-EzW_fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes _6M-EzW_fadeOutUp {
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes _6M-EzW_fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+._6M-EzW_footer {
+  min-height: var(--expo-log-footer-height);
+  padding-bottom: var(--android-safe-area-inset-bottom, env(safe-area-inset-bottom));
+  background-color: var(--expo-log-secondary-system-background);
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+._6M-EzW_headerBlur {
+  background: linear-gradient(to top, transparent, var(--expo-log-color-background));
+  -webkit-mask-image: linear-gradient(to bottom, var(--expo-log-color-background) 50%, transparent);
+  mask-image: linear-gradient(to bottom, var(--expo-log-color-background) 50%, transparent);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  height: 48px;
+  min-height: 48px;
+  position: absolute;
+  top: 47px;
+  left: 0;
+  right: 0;
+}
+
+@media screen and (width >= 576px) {
+  ._6M-EzW_overlay {
+    top: 10vh;
+    bottom: 10vh;
+  }
+
+  ._6M-EzW_container {
+    border: 1px solid var(--expo-log-color-border);
+    border-radius: 10px;
+  }
+}
+
+@media (width >= 576px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 540px;
+  }
+}
+
+@media (width >= 768px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 720px;
+  }
+}
+
+@media (width >= 992px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 960px;
+  }
+}
+</style><style id="ReanimatedPredefinedWebAnimationsStyle"></style><style id="ReanimatedCustomWebAnimationsStyle"></style><style id="ReanimatedCSSStyleTag"></style><style id="expo-generated-fonts">@font-face{font-family:"ionicons";src:url("/assets/?unstable_path=.%2Fnode_modules%2F%40expo%2Fvector-icons%2Fbuild%2Fvendor%2Freact-native-vector-icons%2FFonts/Ionicons.ttf")}</style></head>
+
+  <body>
+    <!-- Use static rendering with Expo Router to support running without JavaScript. -->
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"><div class="css-view-g5y9jx r-flex-13awgt0"><div class="css-view-g5y9jx r-flex-13awgt0"><div class="css-view-g5y9jx" style="flex: 1 1 0%;"><div style="position: absolute; inset: 0px; pointer-events: none; visibility: hidden;"></div><div class="css-view-g5y9jx r-flex-13awgt0"><div class="css-view-g5y9jx r-flex-13awgt0 r-bottom-1p0dtai r-left-1d2f490 r-position-u8s1d r-right-zchlnj r-top-ipm5af" style="background-color: rgb(242, 242, 242); display: flex;"><div class="css-view-g5y9jx r-flex-13awgt0"><div class="css-view-g5y9jx r-flex-13awgt0"><div class="css-view-g5y9jx r-flex-13awgt0" style="background-color: rgb(248, 249, 250);"><div class="css-view-g5y9jx r-alignSelf-1kihuf0 r-flex-13awgt0 r-width-13qz1uu" style="padding-top: 10px; padding-bottom: 0px; max-width: 1240px;"><div class="css-view-g5y9jx r-paddingBottom-kzbkwu r-paddingInline-u9wvl5"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1s367qj"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-t23y2h r-height-ur6pnr r-justifyContent-1777fci r-width-1mhb1uw" style="background-color: rgb(217, 119, 6);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(255, 255, 255); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div><div class="css-view-g5y9jx" style="flex: 1 1 0%;"><div dir="auto" class="css-text-146c3p1 r-fontSize-1i10wst r-fontWeight-ovu0ai r-letterSpacing-foe95m" style="color: rgb(30, 41, 59);">PanificioOS</div><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-flexWrap-1w6e6rj r-gap-1ey881g r-marginTop-19qrga8"><div dir="auto" class="css-text-146c3p1 r-maxWidth-dnmrzs r-overflow-1udh08x r-textOverflow-1udbk01 r-whiteSpace-3s2u2q r-wordWrap-1iln25a r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">Laboratorio · 25 nov 2026</div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-cpet4d r-flexDirection-18u37iz r-gap-9aw3ui r-paddingBlock-xjggfu r-paddingInline-c6ipad" data-testid="sync-badge" style="background-color: rgb(16, 185, 129);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 13px; color: rgb(255, 255, 255); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-ovu0ai r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">Server sincronizzato</div></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-ojf8lh"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-1mxhqmb r-borderWidth-rs99b7 r-flexDirection-18u37iz r-gap-580adz r-maxWidth-zrzavs r-minHeight-2yi16 r-paddingInline-is05cd" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 16px; color: rgb(217, 119, 6); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1 r-maxWidth-dnmrzs r-overflow-1udh08x r-textOverflow-1udbk01 r-whiteSpace-3s2u2q r-wordWrap-1iln25a r-flexShrink-1wbh5a2 r-fontSize-1gkfh8e r-fontWeight-1vr29t4" style="color: rgb(30, 41, 59);">Bottega Artigianale</div></div><div aria-label="Ripristina dati demo" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="reset-demo" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div></div><div class="css-view-g5y9jx r-WebkitOverflowScrolling-150rngu r-flexDirection-18u37iz r-flexGrow-16y2uox r-flexShrink-1wbh5a2 r-overflowX-lltvgl r-overflowY-buy8e9 r-transform-agouwx r-scrollbarWidth-2eszeu"><div class="css-view-g5y9jx r-flexDirection-18u37iz r-gap-1ey881g r-paddingTop-ttdzmv"><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-borderRadius-cpet4d r-paddingBlock-11f147o r-paddingInline-1m1l54l" data-testid="mode-Bottega Artigianale" style="background-color: rgb(254, 243, 199);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4" style="color: rgb(146, 64, 14);">Bottega Artigianale</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-borderRadius-cpet4d r-paddingBlock-11f147o r-paddingInline-1m1l54l" data-testid="mode-Reparto GDO" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4" style="color: rgb(51, 65, 85);">Reparto GDO</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-borderRadius-cpet4d r-paddingBlock-11f147o r-paddingInline-1m1l54l" data-testid="mode-Industriale" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4" style="color: rgb(51, 65, 85);">Industriale</div></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-flexWrap-1w6e6rj r-gap-ojf8lh r-paddingTop-tskmnb"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-9aw3ui r-marginRight-a5pmau"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 16px; color: rgb(100, 116, 139); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(100, 116, 139); font-size: 11px; font-weight: 800;">Seleziona operatore:</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-flexDirection-18u37iz r-gap-9aw3ui r-minHeight-1ii58gl r-paddingInline-1ubuhtd" data-testid="operator-0" style="background-color: rgb(30, 41, 59); border-color: rgb(30, 41, 59);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 13px; color: rgb(217, 119, 6); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(248, 249, 250); font-size: 11px; font-weight: 800;">Mario – Capoturno</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-flexDirection-18u37iz r-gap-9aw3ui r-minHeight-1ii58gl r-paddingInline-1ubuhtd" data-testid="operator-1" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(51, 65, 85); font-size: 11px; font-weight: 800;">Luca – Notte</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-flexDirection-18u37iz r-gap-9aw3ui r-minHeight-1ii58gl r-paddingInline-1ubuhtd" data-testid="operator-2" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(51, 65, 85); font-size: 11px; font-weight: 800;">Amministratore</div></div></div></div><div class="css-view-g5y9jx r-WebkitOverflowScrolling-150rngu r-flexDirection-eqz5dr r-flexGrow-16y2uox r-flexShrink-1wbh5a2 r-overflowX-11yh6sk r-overflowY-1rnoaur r-transform-agouwx r-scrollbarWidth-2eszeu"><div class="css-view-g5y9jx r-paddingBottom-lhv16n r-paddingTop-5t7p9m" style="padding-right: 32px; padding-left: 32px;"><div class="css-view-g5y9jx"><div class="css-view-g5y9jx r-alignItems-1habvwh r-flexDirection-18u37iz r-gap-uaa2di r-marginBottom-1euja1d"><div class="css-view-g5y9jx" style="flex: 1 1 0%;"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-ovu0ai r-letterSpacing-19r33im r-marginBottom-d0pm55" style="color: rgb(217, 119, 6);">QUADRO GENERALE</div><div dir="auto" class="css-text-146c3p1 r-fontSize-axlblu r-fontWeight-ovu0ai r-letterSpacing-16krg75" style="color: rgb(30, 41, 59);">Buongiorno, laboratorio</div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-hjklzo r-marginTop-1g94qm0" style="color: rgb(100, 116, 139);">Turno Mattina · Operatore Mario – Capoturno</div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-cpet4d r-flexDirection-18u37iz r-gap-580adz r-paddingBlock-1yd117h r-paddingInline-1ubuhtd" style="background-color: rgb(16, 185, 129);"><div class="css-view-g5y9jx r-backgroundColor-14lw9ot r-borderRadius-kdyh1x r-height-1xbve24 r-width-8hc5te"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(255, 255, 255); font-weight: 800; font-size: 12px;">IN DIRETTA</div></div></div><div class="css-view-g5y9jx" style="gap: 10px; margin-bottom: 18px;"><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-1ylenci r-flexDirection-18u37iz r-gap-1s367qj r-padding-1oqcu8e" data-testid="starter-alert-madre" style="background-color: rgb(245, 158, 11);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 24px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div class="css-view-g5y9jx" style="flex: 1 1 0%;"><div dir="auto" class="css-text-146c3p1" style="color: rgb(30, 41, 59); font-weight: 900; font-size: 14px;">Pasta Madre Solida oltre il picco</div><div dir="auto" class="css-text-146c3p1" style="color: rgb(30, 41, 59); font-size: 12px; margin-top: 3px;">Rinfrescare prima di usarlo negli impasti.</div></div><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-ovu0ai r-letterSpacing-ud0q2t r-marginBottom-5oul0u" style="color: rgb(100, 116, 139);">INDICATORI CHIAVE DI PRESTAZIONE</div><div class="css-view-g5y9jx r-flexDirection-18u37iz r-gap-uaa2di r-marginBottom-le4sbl r-flexWrap-tzz3ar"><div class="css-view-g5y9jx r-borderRadius-t23y2h r-borderWidth-rs99b7 r-flex-13awgt0 r-minHeight-kj8ra5 r-minWidth-t3h0cv r-padding-1oqcu8e" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-1q9bdsx r-height-1a8msfu r-justifyContent-1777fci r-marginBottom-6gpygo r-width-131xog0" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 21px; color: rgb(217, 119, 6); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-yy2aun r-fontWeight-ovu0ai r-letterSpacing-f2mvze" style="color: rgb(30, 41, 59);">486 kg</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-b88u0q r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Kg impastati oggi</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-marginTop-156q2ks" style="color: rgb(217, 119, 6);">+8,4% rispetto a ieri</div></div><div class="css-view-g5y9jx r-borderRadius-t23y2h r-borderWidth-rs99b7 r-flex-13awgt0 r-minHeight-kj8ra5 r-minWidth-t3h0cv r-padding-1oqcu8e" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-1q9bdsx r-height-1a8msfu r-justifyContent-1777fci r-marginBottom-6gpygo r-width-131xog0" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 21px; color: rgb(16, 185, 129); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-yy2aun r-fontWeight-ovu0ai r-letterSpacing-f2mvze" style="color: rgb(30, 41, 59);">91,8%</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-b88u0q r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Resa media cottura</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-marginTop-156q2ks" style="color: rgb(16, 185, 129);">Obiettivo 90%</div></div><div class="css-view-g5y9jx r-borderRadius-t23y2h r-borderWidth-rs99b7 r-flex-13awgt0 r-minHeight-kj8ra5 r-minWidth-t3h0cv r-padding-1oqcu8e" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-1q9bdsx r-height-1a8msfu r-justifyContent-1777fci r-marginBottom-6gpygo r-width-131xog0" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 21px; color: rgb(2, 132, 199); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-yy2aun r-fontWeight-ovu0ai r-letterSpacing-f2mvze" style="color: rgb(30, 41, 59);">1</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-b88u0q r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Impasti in lievitazione</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-marginTop-156q2ks" style="color: rgb(2, 132, 199);">5 lotti attivi</div></div><div class="css-view-g5y9jx r-borderRadius-t23y2h r-borderWidth-rs99b7 r-flex-13awgt0 r-minHeight-kj8ra5 r-minWidth-t3h0cv r-padding-1oqcu8e" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderRadius-1q9bdsx r-height-1a8msfu r-justifyContent-1777fci r-marginBottom-6gpygo r-width-131xog0" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 21px; color: rgb(245, 158, 11); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-yy2aun r-fontWeight-ovu0ai r-letterSpacing-f2mvze" style="color: rgb(30, 41, 59);">3</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-b88u0q r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Allerte operative</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-marginTop-156q2ks" style="color: rgb(245, 158, 11);">2 scorte · 1 HACCP</div></div></div><div class="css-view-g5y9jx r-borderRadius-1867qdf r-borderWidth-rs99b7 r-marginBottom-1ifxtd0 r-padding-nsbfu8" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-obd0qt r-flexDirection-18u37iz r-gap-1ssbvtb r-justifyContent-1wtj0ep r-marginBottom-6gpygo"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-1lybf8k r-marginBottom-wr9vkk" style="color: rgb(217, 119, 6);">DIARIO DI BORDO</div><div dir="auto" class="css-text-146c3p1 r-fontSize-cv4lhi r-fontWeight-1vr29t4 r-letterSpacing-foe95m" style="color: rgb(30, 41, 59);">Passaggio consegne</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-justifyContent-1777fci r-minHeight-peo1c r-paddingInline-n7gxbd" data-testid="note-composer-toggle" style="opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-1vr29t4" style="color: rgb(217, 119, 6);">+ Nota</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-hjklzo r-marginBottom-1cad53l" style="color: rgb(100, 116, 139);">Lascia una traccia chiara al prossimo turno. Le priorità restano visibili su ogni tablet.</div><div class="css-view-g5y9jx r-WebkitOverflowScrolling-150rngu r-flexDirection-18u37iz r-flexGrow-16y2uox r-flexShrink-1wbh5a2 r-overflowX-lltvgl r-overflowY-buy8e9 r-transform-agouwx r-scrollbarWidth-2eszeu"><div class="css-view-g5y9jx r-flexDirection-18u37iz r-gap-1cmwbt1 r-paddingBottom-kzbkwu"><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-justifyContent-1777fci r-minHeight-2yi16 r-paddingInline-3o4zer" data-testid="shift-filter-tutti" style="background-color: rgb(217, 119, 6); border-color: rgb(217, 119, 6);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(255, 255, 255); font-size: 12px; font-weight: 800;">Tutti</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-justifyContent-1777fci r-minHeight-2yi16 r-paddingInline-3o4zer" data-testid="shift-filter-notte" style="background-color: rgb(241, 245, 249); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(51, 65, 85); font-size: 12px; font-weight: 800;">Notte</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-justifyContent-1777fci r-minHeight-2yi16 r-paddingInline-3o4zer" data-testid="shift-filter-mattina" style="background-color: rgb(241, 245, 249); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(51, 65, 85); font-size: 12px; font-weight: 800;">Mattina</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-cpet4d r-borderWidth-rs99b7 r-justifyContent-1777fci r-minHeight-2yi16 r-paddingInline-3o4zer" data-testid="shift-filter-pomeriggio" style="background-color: rgb(241, 245, 249); border-color: rgb(226, 232, 240);"><div dir="auto" class="css-text-146c3p1" style="color: rgb(51, 65, 85); font-size: 12px; font-weight: 800;">Pomeriggio</div></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderBottomWidth-qklmqi r-flexDirection-18u37iz r-gap-1y00bll r-minHeight-2t2l5v r-paddingBlock-kritb0" style="border-bottom-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-borderRadius-z2wwpe r-height-eu3ka r-width-z2qzgk" style="background-color: rgb(239, 68, 68);"></div><div class="css-view-g5y9jx r-flex-13awgt0 r-minWidth-bcqeeo"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1cmwbt1 r-marginBottom-d0pm55"><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Notte</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">19:07</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(239, 68, 68);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">Urgente</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-14yzgew" style="color: rgb(51, 65, 85);">Biga per domani pronta in cella 2 a 18°C</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-b88u0q r-marginTop-14gqq1x" data-testid="note-signature-n1" style="color: rgb(100, 116, 139);">Firmato: Luca – Notte</div></div><div aria-label="Elimina nota" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="delete-note-n1" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderBottomWidth-qklmqi r-flexDirection-18u37iz r-gap-1y00bll r-minHeight-2t2l5v r-paddingBlock-kritb0" style="border-bottom-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-borderRadius-z2wwpe r-height-eu3ka r-width-z2qzgk" style="background-color: rgb(245, 158, 11);"></div><div class="css-view-g5y9jx r-flex-13awgt0 r-minWidth-bcqeeo"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1cmwbt1 r-marginBottom-d0pm55"><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Mattina</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">20:07</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(254, 243, 199);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(146, 64, 14);">Manutenzione</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-14yzgew" style="color: rgb(51, 65, 85);">Forno 1: verificare platea bassa prima delle 14:00</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-b88u0q r-marginTop-14gqq1x" data-testid="note-signature-n2" style="color: rgb(100, 116, 139);">Firmato: Mario – Capoturno</div></div><div aria-label="Elimina nota" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="delete-note-n2" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderBottomWidth-qklmqi r-flexDirection-18u37iz r-gap-1y00bll r-minHeight-2t2l5v r-paddingBlock-kritb0" style="border-bottom-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-borderRadius-z2wwpe r-height-eu3ka r-width-z2qzgk" style="background-color: rgb(16, 185, 129);"></div><div class="css-view-g5y9jx r-flex-13awgt0 r-minWidth-bcqeeo"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1cmwbt1 r-marginBottom-d0pm55"><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Mattina</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">21:07</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(51, 65, 85);">Normale</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-14yzgew" style="color: rgb(51, 65, 85);">Licoli rinfrescato · rapporto 1:2:2</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-b88u0q r-marginTop-14gqq1x" data-testid="note-signature-n3" style="color: rgb(100, 116, 139);">Firmato: Mario – Capoturno</div></div><div aria-label="Elimina nota" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="delete-note-n3" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderBottomWidth-qklmqi r-flexDirection-18u37iz r-gap-1y00bll r-minHeight-2t2l5v r-paddingBlock-kritb0" style="border-bottom-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-borderRadius-z2wwpe r-height-eu3ka r-width-z2qzgk" style="background-color: rgb(16, 185, 129);"></div><div class="css-view-g5y9jx r-flex-13awgt0 r-minWidth-bcqeeo"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1cmwbt1 r-marginBottom-d0pm55"><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Pomeriggio</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">13:00</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(241, 245, 249);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(51, 65, 85);">Normale</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-14yzgew" style="color: rgb(51, 65, 85);">Prenotazione GDO: aggiungere 12 ciabatte al carico</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-b88u0q r-marginTop-14gqq1x" data-testid="note-signature-n4" style="color: rgb(100, 116, 139);">Firmato: Amministratore</div></div><div aria-label="Elimina nota" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="delete-note-n4" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderBottomWidth-qklmqi r-flexDirection-18u37iz r-gap-1y00bll r-minHeight-2t2l5v r-paddingBlock-kritb0" style="border-bottom-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-borderRadius-z2wwpe r-height-eu3ka r-width-z2qzgk" style="background-color: rgb(245, 158, 11);"></div><div class="css-view-g5y9jx r-flex-13awgt0 r-minWidth-bcqeeo"><div class="css-view-g5y9jx r-alignItems-1awozwy r-flexDirection-18u37iz r-gap-1cmwbt1 r-marginBottom-d0pm55"><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Mattina</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e" style="color: rgb(100, 116, 139);">09:00</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(254, 243, 199);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(146, 64, 14);">Manutenzione</div></div></div><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-lineHeight-14yzgew" style="color: rgb(51, 65, 85);">Sostituita guarnizione cella 2</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-fontWeight-b88u0q r-marginTop-14gqq1x" data-testid="note-signature-n5" style="color: rgb(100, 116, 139);">Firmato: Mario – Capoturno</div></div><div aria-label="Elimina nota" tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-t23y2h r-height-1ugchlj r-justifyContent-1777fci r-width-usgzl9" data-testid="delete-note-n5" style="background-color: rgb(241, 245, 249); opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(30, 41, 59); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div></div><div class="css-view-g5y9jx r-borderRadius-1867qdf r-borderWidth-rs99b7 r-marginBottom-1ifxtd0 r-padding-nsbfu8" style="background-color: rgb(255, 255, 255); border-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-alignItems-obd0qt r-flexDirection-18u37iz r-gap-1ssbvtb r-justifyContent-1wtj0ep r-marginBottom-6gpygo"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-1lybf8k r-marginBottom-wr9vkk" style="color: rgb(217, 119, 6);">PRODUZIONE DI OGGI</div><div dir="auto" class="css-text-146c3p1 r-fontSize-cv4lhi r-fontWeight-1vr29t4 r-letterSpacing-foe95m" style="color: rgb(30, 41, 59);">Scaletta infornate</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-justifyContent-1777fci r-minHeight-peo1c r-paddingInline-n7gxbd" data-testid="dashboard-open-production" style="opacity: 1;"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-1vr29t4" style="color: rgb(217, 119, 6);">Vedi produzione</div></div></div><div class="css-view-g5y9jx r-flexDirection-18u37iz r-justifyContent-1wtj0ep r-paddingBottom-lgpkq"><div dir="auto" class="css-text-146c3p1 r-flex-13awgt0 r-fontSize-10x49cs r-fontWeight-ovu0ai r-letterSpacing-1cm7zt9" style="color: rgb(100, 116, 139);">INFORNATA / FORNO</div><div dir="auto" class="css-text-146c3p1 r-flex-13awgt0 r-fontSize-10x49cs r-fontWeight-ovu0ai r-letterSpacing-1cm7zt9" style="color: rgb(100, 116, 139);">PRODOTTO</div><div dir="auto" class="css-text-146c3p1 r-flex-13awgt0 r-fontSize-10x49cs r-fontWeight-ovu0ai r-letterSpacing-1cm7zt9" style="color: rgb(100, 116, 139);">STATO</div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderTopWidth-5kkj8d r-flexDirection-18u37iz r-gap-1cmwbt1 r-paddingBlock-ywh0we" style="border-top-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">In forno dalle 12:11</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Forno 1 · 220°C</div></div><div dir="auto" class="css-text-146c3p1 r-flex-12kx4ge r-fontSize-1enofrn r-fontWeight-1vr29t4" style="color: rgb(30, 41, 59);">Pane Comune Tipo 0</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(217, 119, 6);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">In Forno</div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderTopWidth-5kkj8d r-flexDirection-18u37iz r-gap-1cmwbt1 r-paddingBlock-ywh0we" style="border-top-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">In forno dalle 12:26</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Forno 2 · 240°C</div></div><div dir="auto" class="css-text-146c3p1 r-flex-12kx4ge r-fontSize-1enofrn r-fontWeight-1vr29t4" style="color: rgb(30, 41, 59);">Ciabatta Alta Idratazione</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(217, 119, 6);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">In Forno</div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderTopWidth-5kkj8d r-flexDirection-18u37iz r-gap-1cmwbt1 r-paddingBlock-ywh0we" style="border-top-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">In forno dalle 12:26</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Forno 1 · 230°C</div></div><div dir="auto" class="css-text-146c3p1 r-flex-12kx4ge r-fontSize-1enofrn r-fontWeight-1vr29t4" style="color: rgb(30, 41, 59);">Focaccia Pugliese</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(217, 119, 6);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">In Forno</div></div></div><div class="css-view-g5y9jx r-alignItems-1awozwy r-borderTopWidth-5kkj8d r-flexDirection-18u37iz r-gap-1cmwbt1 r-paddingBlock-ywh0we" style="border-top-color: rgb(226, 232, 240);"><div class="css-view-g5y9jx r-flex-13awgt0"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-ovu0ai" style="color: rgb(30, 41, 59);">Infornata ~ 23:23</div><div dir="auto" class="css-text-146c3p1 r-fontSize-10x49cs r-marginTop-19qrga8" style="color: rgb(100, 116, 139);">Forno 2 · 230°C</div></div><div dir="auto" class="css-text-146c3p1 r-flex-12kx4ge r-fontSize-1enofrn r-fontWeight-1vr29t4" style="color: rgb(30, 41, 59);">Pane Integrale Licoli</div><div class="css-view-g5y9jx r-alignSelf-k200y r-borderRadius-cpet4d r-paddingBlock-vuvdlw r-paddingInline-1ubuhtd" style="background-color: rgb(16, 185, 129);"><div dir="auto" class="css-text-146c3p1 r-fontSize-1gkfh8e r-fontWeight-1vr29t4 r-letterSpacing-3ucsff" style="color: rgb(255, 255, 255);">In Cella</div></div></div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-borderRadius-1ylenci r-flexDirection-18u37iz r-gap-1s367qj r-marginBottom-1ifxtd0 r-padding-1oqcu8e" data-testid="dashboard-haccp-banner" style="background-color: rgb(254, 243, 199);"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 23px; color: rgb(146, 64, 14); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div class="css-view-g5y9jx" style="flex: 1 1 0%;"><div dir="auto" class="css-text-146c3p1 r-fontSize-n6v787 r-fontWeight-ovu0ai" style="color: rgb(146, 64, 14);">HACCP · 1 temperatura fuori intervallo</div><div dir="auto" class="css-text-146c3p1 r-fontSize-1enofrn r-lineHeight-5fcqz0 r-marginTop-19qrga8" style="color: rgb(146, 64, 14);">Cella 2 +7,8°C: ripetere il controllo e firmare.</div></div><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 20px; color: rgb(146, 64, 14); font-family: ionicons; font-weight: normal; font-style: normal;"></div></div></div></div></div><div class="css-view-g5y9jx r-borderTopWidth-5kkj8d r-flexDirection-18u37iz r-minHeight-173w5o r-paddingInline-is05cd" style="background-color: rgb(255, 255, 255); border-top-color: rgb(226, 232, 240);"><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-flex-13awgt0 r-justifyContent-1777fci r-minHeight-adacv" data-testid="nav-oggi"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 22px; color: rgb(217, 119, 6); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(217, 119, 6); font-size: 11px; font-weight: 900; margin-top: 4px;">Oggi</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-flex-13awgt0 r-justifyContent-1777fci r-minHeight-adacv" data-testid="nav-ricettario"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 22px; color: rgb(100, 116, 139); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(100, 116, 139); font-size: 11px; font-weight: 900; margin-top: 4px;">Ricette</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-flex-13awgt0 r-justifyContent-1777fci r-minHeight-adacv" data-testid="nav-produzione"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 22px; color: rgb(100, 116, 139); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(100, 116, 139); font-size: 11px; font-weight: 900; margin-top: 4px;">Produzione</div></div><div tabindex="0" class="css-view-g5y9jx r-cursor-1loqt21 r-touchAction-1otgn73 r-alignItems-1awozwy r-flex-13awgt0 r-justifyContent-1777fci r-minHeight-adacv" data-testid="nav-altro"><div dir="auto" class="css-text-146c3p1 r-userSelect-lrvibr" style="font-size: 22px; color: rgb(100, 116, 139); font-family: ionicons; font-weight: normal; font-style: normal;"></div><div dir="auto" class="css-text-146c3p1" style="color: rgb(100, 116, 139); font-size: 11px; font-weight: 900; margin-top: 4px;">Altro</div></div></div></div></div></div></div></div></div></div><div class="css-view-g5y9jx r-display-hvic4v r-position-u8s1d" style="transform: translateX(0px) translateY(0px);"></div></div></div></div>
+  <script src="./index_files/entry.bundle" defer=""></script><script type="module" src="./index_files/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;7f7b0fd8732c4326aae4b9d58d5c514a&quot;,&quot;spa&quot;:2}" crossorigin="anonymous"></script>
+
+
+<div id="error-toast" style="position: absolute;"><template shadowrootmode="open"><style>
+    :host {
+      all: initial;
+      direction: ltr;
+      position: absolute;
+    }
+  </style><style id="react-native-stylesheet"></style><style data-expo-css-hmr="node_modules__expo_log_box_build_toast_ErrorToast_module_css" data-expo-loader="css">.ANPXsG_container {
+  bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  max-width: 320px;
+  display: flex;
+  position: fixed;
+  left: 10px;
+  right: 10px;
+}
+
+.ANPXsG_toast {
+  border: 1px solid var(--expo-log-color-danger);
+  cursor: pointer;
+  height: 48px;
+  font-family: var(--expo-log-font-family);
+  background-color: #632e2c;
+  border-radius: 6px;
+  flex-direction: row;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 0 10px;
+  transition: background-color .2s;
+  display: flex;
+  overflow: hidden;
+}
+
+@media (hover: hover) {
+  .ANPXsG_toast:hover {
+    background-color: #924340;
+  }
+}
+
+.ANPXsG_message {
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--expo-log-color-label);
+  font-family: var(--expo-log-font-family);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+  padding-left: 8px;
+  font-size: 14px;
+  line-height: 22px;
+  display: block;
+  overflow: hidden;
+}
+
+.ANPXsG_count {
+  background: var(--expo-log-color-danger);
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  min-width: 30px;
+  height: 30px;
+  display: flex;
+}
+
+.ANPXsG_countText {
+  color: var(--expo-log-color-label);
+  font-family: var(--expo-log-font-family);
+  text-align: center;
+  text-shadow: 0 0 3px #333c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.ANPXsG_dismissButton {
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin: -12px -10px -12px -5px;
+  padding: 12px 10px;
+}
+
+.ANPXsG_dismissContent {
+  background-color: #ffffff1a;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  transition: opacity .2s;
+  display: flex;
+}
+
+@media (hover: hover) {
+  .ANPXsG_dismissButton:hover .ANPXsG_dismissContent {
+    opacity: .8;
+  }
+}
+
+.ANPXsG_dismissButton:active .ANPXsG_dismissContent {
+  opacity: .5;
+}
+
+.ANPXsG_dismissIcon {
+  color: #fff;
+  width: 12px;
+  height: 12px;
+}
+</style><style data-expo-css-hmr="node_modules__expo_log_box_build_overlay_Overlay_module_css" data-expo-loader="css">:host {
+  --expo-log-color-border: #313538;
+  --expo-log-color-label: #edeef0;
+  --expo-log-color-background: #111113;
+  --expo-log-secondary-label: #ebebf599;
+  --expo-log-secondary-system-background: #1c1c1f;
+  --expo-log-secondary-system-grouped-background: #18191b;
+  --expo-log-secondary-system-background-hover: #272a2d;
+  --expo-log-color-danger: #ec5e5e;
+  --expo-log-syntax-red: #ec5e5e;
+  --expo-log-syntax-orange: #ffa163;
+  --expo-log-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --expo-log-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+@supports (color: color(display-p3 0 0 0)) {
+  :host {
+    --expo-log-secondary-system-grouped-background: color(display-p3 .095 .098 .105);
+    --expo-log-secondary-system-background-hover: color(display-p3 .156 .163 .176);
+    --expo-log-color-danger: color(display-p3 .861 .403 .387);
+    --expo-log-syntax-red: color(display-p3 .861 .403 .387);
+    --expo-log-syntax-orange: color(display-p3 1 .63 .38);
+  }
+}
+
+._6M-EzW_overlayIos {
+  top: 0;
+}
+
+._6M-EzW_overlayAndroid {
+  top: var(--android-safe-area-inset-top, env(safe-area-inset-top));
+}
+
+._6M-EzW_overlayWeb {
+  top: calc(10vh + env(safe-area-inset-top, 2vh));
+}
+
+._6M-EzW_overlay {
+  z-index: 9900;
+  -webkit-font-smoothing: antialiased;
+  flex-direction: column;
+  align-content: center;
+  align-items: center;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+._6M-EzW_containerTopRadius {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+._6M-EzW_container {
+  --expo-log-max-width: 960px;
+  max-width: var(--expo-log-max-width);
+  background-color: var(--expo-log-color-background);
+  opacity: 0;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  animation: .2s ease-out forwards _6M-EzW_fadeInUp;
+  display: flex;
+  position: relative;
+  overflow-x: hidden;
+  transform: translateY(20px);
+}
+
+._6M-EzW_content {
+  opacity: 0;
+  background-color: var(--expo-log-color-background);
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  animation: .2s ease-out forwards _6M-EzW_fadeInUp;
+  display: flex;
+}
+
+._6M-EzW_scroll {
+  background-color: var(--expo-log-color-background);
+  padding-top: 16px;
+  padding-bottom: calc(var(--expo-log-footer-height) + 1rem);
+  flex-direction: column;
+  flex: 1;
+  gap: .5rem;
+  display: flex;
+  position: relative;
+  overflow: hidden auto;
+}
+
+._6M-EzW_bg {
+  backdrop-filter: blur(10px);
+  pointer-events: all;
+  z-index: -1;
+  opacity: 0;
+  background-color: #000c;
+  animation: .15s ease-out forwards _6M-EzW_data-expo-log-backdrop-fade-in;
+  position: fixed;
+  inset: 0;
+}
+
+._6M-EzW_bgExit {
+  opacity: 1;
+  animation: .15s ease-in forwards _6M-EzW_fadeOut;
+}
+
+._6M-EzW_containerExit {
+  opacity: 1;
+  animation: .15s ease-in forwards _6M-EzW_fadeOutUp;
+  transform: translateY(0);
+}
+
+@keyframes _6M-EzW_data-expo-log-backdrop-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes _6M-EzW_fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes _6M-EzW_fadeOutUp {
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes _6M-EzW_fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+._6M-EzW_footer {
+  min-height: var(--expo-log-footer-height);
+  padding-bottom: var(--android-safe-area-inset-bottom, env(safe-area-inset-bottom));
+  background-color: var(--expo-log-secondary-system-background);
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+._6M-EzW_headerBlur {
+  background: linear-gradient(to top, transparent, var(--expo-log-color-background));
+  -webkit-mask-image: linear-gradient(to bottom, var(--expo-log-color-background) 50%, transparent);
+  mask-image: linear-gradient(to bottom, var(--expo-log-color-background) 50%, transparent);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  height: 48px;
+  min-height: 48px;
+  position: absolute;
+  top: 47px;
+  left: 0;
+  right: 0;
+}
+
+@media screen and (width >= 576px) {
+  ._6M-EzW_overlay {
+    top: 10vh;
+    bottom: 10vh;
+  }
+
+  ._6M-EzW_container {
+    border: 1px solid var(--expo-log-color-border);
+    border-radius: 10px;
+  }
+}
+
+@media (width >= 576px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 540px;
+  }
+}
+
+@media (width >= 768px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 720px;
+  }
+}
+
+@media (width >= 992px) {
+  ._6M-EzW_container {
+    --expo-log-max-width: 960px;
+  }
+}
+</style><div></div></template></div></body></html>

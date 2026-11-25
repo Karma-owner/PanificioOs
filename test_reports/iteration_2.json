@@ -1,0 +1,55 @@
+{
+  "summary": "Backend GET/PUT /api/panificio/state: 6/6 pytest pass (persistence, updated_at, id forced to 'demo', 422 validation). Frontend (mobile 390x844 + tablet 1024x768): seed path after empty PUT works (4 recipes/4 notes/5 batches/5 stock/3 returns), sync badge shows 'Cloud sincronizzato' / 'Offline', note publish persisted to backend, shift filters correct, allergen modal (descending weight + GLUTINE legend), advance-b4 Da Impastare->In Puntata persisted and survives reload, trace-b1 HACCP sheet (lots, signatures, print-trace), Reports 3 charts + 7 waste bars, offline queue retries and flushes after reconnect, Reset Demo restores backend seeds. No overflow on tablet; kanban horizontally scrollable. ONE REAL BUG: polling overwrites unsynced pending edits and badge falsely shows 'Cloud sincronizzato'. No deprecated Expo packages detected (no expo-av/expo-barcode-scanner/expo-background-fetch). SafeArea handled via useSafeAreaInsets.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/panificio/state", "issue": "updated_at format inconsistent: PUT returns tz-aware '...806407Z', GET returns naive '...806000' (no Z, ms precision; Mongo drops tzinfo). Use tz_aware=True on AsyncIOMotorClient or serialize as ISO string."},
+      {"endpoint": "PUT /api/panificio/state", "issue": "Whole-document last-write-wins with no version/updated_at check: two tablets editing concurrently will silently overwrite each other's changes. Consider optimistic concurrency (send base updated_at, reject 409 if stale) or per-collection patch endpoints."},
+      {"endpoint": "PUT /api/panificio/state", "issue": "Nested items typed as List[dict[str, Any]] - no schema validation of notes/batches/stock/recipes; no auth so anyone can wipe state."},
+      {"endpoint": "GET /health (public)", "issue": "Still routed to frontend (returns text/html) - old test_panificio_api.py::test_health_and_state_round_trip still fails because of this (known/bypassed)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "sync.ts pollRemote", "issue": "REPRODUCED: with PUT failing (GET ok), advance-b4 -> UI shows 'In Puntata'; at ~12s poll returns stale remote state, UI REVERTS to 'Da Impastare' and badge flips to 'Cloud sincronizzato' while the change is still pending/unsaved. If the user edits again before retry flush, enqueueSave replaces `pending` with the remote-based state -> offline edit permanently lost. Same can happen in real offline when connectivity returns between flush failure and retry (fetch timeout 8s + 10s retry > 12s poll). Fix: in pollRemote, if `pending` !== null (or saveTimer/retryTimer active) skip applying remote and do not set status 'online'; optionally trigger flushPending() instead. Reference: /app/frontend/src/utils/sync.ts:110-122, /app/frontend/app/index.tsx:63-70", "testID": "sync-badge", "priority": "HIGH"}
+    ],
+    "integration_issues": [
+      {"flow": "Dead action buttons", "issue": "SectionTitle actions without onAction do nothing: '+ Nuovo lotto', 'Vedi produzione', '+ Registra lotto', '+ Check', '+ Registra reso'; 'Registra rinfresco' Pressable has no onPress; HACCP banner shows chevron but is not pressable.", "affected_testIDs": []}
+    ],
+    "design_issues": [
+      {"screen": "Produzione kanban", "issues": ["advance-* (74x32) and trace-* (99x32) buttons below 44pt min touch target", "Batch card buttons wrap onto 2 lines on tablet columns (210px) - fine but cramped"]},
+      {"screen": "Header", "issues": ["Mode option chips 28px tall (<44pt)", "Caption date hardcoded 'Laboratorio · 18 Giu 2026' and Dashboard 'Ultimo aggiornamento 08:42' hardcoded, while traceability sheet uses real date (24/11/2026) -> inconsistent; drive from updated_at / current date"]},
+      {"screen": "Dashboard notes", "issues": ["New notes persist time: 'Adesso' forever - after reload/next day still says 'Adesso'. Store ISO createdAt and format relative time."]},
+      {"screen": "Report", "issues": ["Charts are pseudo-dynamic: planned/actual derived from batches.length*42+recipes.length*7 modulo formula, waste trend synthesized from today's total; 'Waste medio' = totalWaste*0.7 shown as '%' (unit mismatch). Waste chart has no day labels. Flour mix labels lowercase ('tipo 0', 'integrale')."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_panificio_state.py", "/app/test_reports/pytest/pytest_iter2.xml"],
+  "action_items": [
+    "HIGH: Fix pollRemote race in /app/frontend/src/utils/sync.ts - skip applying remote/setting 'online' while a save is pending or retry is scheduled (export a hasPending() or check `pending` inside pollRemote).",
+    "Make updated_at consistent (tz-aware) between GET and PUT in /app/backend/server.py.",
+    "Consider optimistic concurrency on PUT (multi-tablet last-write-wins data loss).",
+    "Store note createdAt ISO instead of static 'Adesso'; replace hardcoded header date / 'Ultimo aggiornamento 08:42'.",
+    "Increase advance/trace buttons and mode chips to minHeight 44.",
+    "Wire or hide dead actions (+ Nuovo lotto, Vedi produzione, + Registra lotto, + Check, + Registra reso, Registra rinfresco)."
+  ],
+  "critical_code_review_comments": [
+    "index.tsx is 350 lines but with extremely long single-line JSX components (lines up to several KB) - split Dashboard/Recipes/Production/More/Reports/modals into separate files under src/screens.",
+    "Poll useEffect depends on [loaded, state] so the interval is torn down/recreated on every state change; continuous editing delays polling indefinitely. Use a ref for current state.",
+    "loadInitialState: if backend returns empty recipes it pushes the seed and ignores a non-empty local cache (offline edits lost after backend wipe).",
+    "remainingFromIso progress uses a fixed 180-min assumed window - progress bars are not real stage durations.",
+    "Returns list uses key={item.product}; Recipes ingredient key={ingredient.name} - duplicates possible.",
+    "AllergenModal/TraceabilityModal on web render absolute overlay inside appShell rather than Modal - OK in preview but backdrop doesn't cover full viewport when maxWidth shell is narrower than window on large desktops."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_panificio_state.py (new)",
+    "/app/frontend/src/components/panificio-ui.tsx (added optional testID prop to IconButton and SectionTitle)",
+    "/app/frontend/app/index.tsx (added testIDs: reset-demo, note-composer-toggle, close-allergen, close-trace, delete-note-{id})"
+  ],
+  "success_rate": {"backend": "100% (6/6 new tests)", "frontend": "93% (13/14 checks; poll race bug failed)"},
+  "seed_data_creation": "Backend state was reset to empty to force seed path, then app seeded it; a TEST_ note was created and later removed by Reset Demo. Final state = fresh demo seeds (4 recipes, 4 notes, 5 batches, 5 stock, 3 returns).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Run backend tests with `-n 0` (pytest.ini adds xdist; tests share a single 'demo' doc so parallel runs race). Reset Demo uses window.confirm on web - register page.on('dialog', accept) before clicking [data-testid=reset-demo]. To reproduce poll race: page.route PUT -> abort, GET -> continue, click advance-b4, wait 13s, check b4 column reverts. b5 is 'Sfornato' (no advance button).",
+  "rca_of_issue": "pollRemote() in sync.ts unconditionally fetches remote, sets status 'online' and returns remote state if it differs from current; index.tsx applies it via setState. It is unaware of the module-level `pending` queue, so any unflushed optimistic edit is overwritten in the UI by the older server copy and the badge misreports sync. Mitigation: guard pollRemote with `if (pending) return null;` (and don't setStatus('online') while pending), or merge by updated_at."
+}

@@ -1,0 +1,44 @@
+{
+  "summary": "Frontend tests (Playwright on Expo web, 390x844 / 767 / 768 / 1024) covered all 10 requested features. All of them work: the operator dropdown on mobile and chips at >=768, the madre starter alert and its navigation to Produzione, the real oven-time schedule, the two separate starter forms with validation and persistence, adaptive feeding history, flour deduction on In Puntata (once only, with the warning and a trace section), deduction of both flours for a new Focaccia batch, the archive day selector with per-day PDFs (verified with pdftotext), the timer restart on advance, and sync. No blocking bugs. I found a few logic, formatting and design issues. Deprecated packages detected: none. SafeAreaView issues detected: none.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "estimateBakeTime (In Forno)", "issue": "For a batch In Forno, the start time is computed as max(timerEndsAt, now) minus the bake duration. Once the oven timer expires, 'In forno dalle HH:MM' moves forward every minute instead of staying fixed (b3 shows 21:47 now, but would show 22:05 at 22:30). Use timerEndsAt directly for In Forno. Reference: /app/frontend/src/utils/lab-automation.ts:66-69", "testID": "n/a", "priority": "MEDIUM"},
+      {"component": "Scaletta infornate", "issue": "Estimates that fall after midnight show only HH:MM with no day marker. For example, b4 (12 h in cella) shows 'Infornata ~ 12:52', which is tomorrow, so it is ambiguous. Add 'domani' or a date. Minor: the label renders as 'Infornata ~ 22:29' (with a space) rather than the specified '~HH:MM'. Reference: daily-sheet.ts:19", "testID": "n/a", "priority": "LOW"},
+      {"component": "Feeding history / PDF number format", "issue": "Core temperature and ratio show dot decimals ('26.5°C', '1:1:0.45') in the mobile cards, the tablet table and the PDF, while the hero badge shows '1:1:0,45'. Use it-IT formatting everywhere. Reference: index.tsx:392,413; daily-sheet.ts:66", "testID": "feeding-row-*", "priority": "LOW"},
+      {"component": "Dashboard greeting", "issue": "The title 'Buongiorno, laboratorio' is hardcoded and still shows during the Turno Notte (22:00). Reference: index.tsx:233", "testID": "n/a", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Flour deduction", "issue": "advance() computes the deduction from the render-time closure state.stock, outside the setState updater, then overwrites current.stock. Two advances in quick succession, before a re-render, could lose one deduction. Compute deductFlour inside the updater using current. Reference: index.tsx:343-348", "affected_testIDs": ["advance-*", "flour-notice"]}
+    ],
+    "design_issues": [
+      {"screen": "Dashboard / Header", "issues": ["White text on success #10B981 (starter-alert-madre when ready, sync-badge) has a contrast ratio of about 2.5:1, which fails WCAG AA for 12-14px text. Use a darker green, e.g. #047857."]},
+      {"screen": "Produzione kanban", "issues": ["The advance-* and trace-* buttons are 32px tall, below the 44px touch-target minimum.", "On mobile, an advanced card moves to a column off-screen to the right and gives no feedback apart from the flour notice. Consider auto-scrolling or a toast."]},
+      {"screen": "Archivio / PDF", "issues": ["The archive preview capitalises the month ('Lunedì 23 Novembre 2026'). Italian months are lowercase.", "The archive PDF header 'Operatore:' shows the current operator rather than that day's. Consider renaming it 'Stampato da'.", "Seed notes n1-n3 have hardcoded shifts (Notte/Mattina) but times relative to now, so the PDF shows rows like '21:01 Mattina'."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_7.json"],
+  "action_items": [
+    "Fix estimateBakeTime for In Forno so the start time stays fixed after the timer expires (use timerEndsAt minus the bake duration, no max with now).",
+    "Add a day indicator ('domani') to schedule estimates that cross midnight.",
+    "Format the core temperature and ratio with it-IT decimals in the history cards, table and PDF.",
+    "Move the deductFlour calculation inside the setState updater (use current.stock) to avoid lost updates.",
+    "Improve contrast of white text on the green success background (starter alert, sync badge).",
+    "Raise advance-*/trace-* buttons to a minimum height of 44px.",
+    "Optional: make the greeting depend on the shift, lowercase the month in the archive date, and fix the seed note shifts."
+  ],
+  "critical_code_review_comments": [
+    "index.tsx is 554 lines, but the StyleSheet and many components are packed into single very long lines (e.g. lines 369 and 553), which hurts readability and diffs.",
+    "onDay() assigns undated records (demo returns r1-r3, batches b1-b5) to today, so they appear on every 'today' PDF forever. This is acceptable for the demo, but real records should always carry 'at' / 'createdAt'.",
+    "The archive 'Riepilogo impasti' attributes a batch to its createdAt day, not to the day its flour was deducted.",
+    "Feeding validation, the once-per-batch deduction guard (flourUsage present, even when empty) and the timer restart via stageTimerFrom are all correct."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not tested (frontend only)", "frontend": "100% of requested features pass (10/10); 1 medium and several low-priority issues"},
+  "seed_data_creation": "Created TEST_ feedings (Pasta Madre and Licoli) and a Focaccia batch (10 kg), and advanced b4 and b2. At the end I restored the original seed with reset-demo, as the main agent allowed, and confirmed via GET /api/panificio/state: s2=42 kg, b4 Da Impastare, no TEST_ feedings.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Navigation testIDs: nav-oggi/ricette/produzione/altro. Altro sub-tabs: more-haccp, more-costi, more-report. The reset-demo button is on the dashboard header and uses window.confirm (accept the dialog with asyncio.ensure_future). Batch form chips: batch-recipe-0..3 (3 = Focaccia). Expected values: b4 deduction 6,1 kg; Focaccia '10 kg' deducts 3,3 kg Tipo 0 and 1,4 kg Semola. The dashboard schedule is sliced to 4 rows; the PDF contains all of them.",
+  "rca_of_issue": "Bake-time drift: lab-automation.ts:66 sets currentEnd = max(timerEndsAt, now). For In Forno, the start is currentEnd minus the bake duration, so after expiry it becomes now minus the duration. Fix: for index === ovenIndex, use the timerEndsAt timestamp directly."
+}

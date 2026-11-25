@@ -1,0 +1,42 @@
+{
+  "summary": "Tested the 5 PanificioOS changes on backend and frontend against the public URL (Playwright, 390x844 and 768/1024). Backend: 9/9 pytest pass (-n 0). This includes new tests for the feedings/tempLogs round-trip, defaults when they are left out, and 422 on a wrong type. All requested UI flows PASS. (1) Operator chips operator-0/1/2 work, the choice persists after reload (localStorage), and the subtitle shows the operator. (2) The handover note is signed 'Firmato: Luca – Notte' and persists in the backend and after reload. (3) The feeding form shows the right Italian errors for empty temperature, empty notes and pH 9. A valid save adds a feeding-row with the estimated peak (26°C 1:2:2 -> +6h) and persists. (4) The batch form adds a 'Da Impastare' card with the operator. (5) The lot form rejects 31/02/2027, 2027-05-01, past dates and empty qty. A valid lot adds a stock-row with 'Ricevuto ... · operator' and the lot number in upper case. (6) A temp check of 12°C in Cella 1 adds a red temp-row 'Firmato: ...', and Allarmi HACCP goes from 1 to 2. (7) A return (2,5 kg Grissini) adds a row: Invenduto goes from 6,9 to 9,4 kg and Valore recuperato from €13,80 to €21,30. (8) The traceability modal shows trace-sign-production=Amministratore and trace-sign-haccp with the latest check's operator and time. (9) download-daily-pdf triggers a real download, foglio-lavoro-YYYY-MM-DD.pdf, A4 210x297 mm. It contains the date, shift, operator, bake schedule, dough summary, HACCP table (NON CONFORME flagged), starter and handover sections, and pdf-export-message is shown. (10) The English-word scan of the visible text on all tabs and sub-tabs found no English terms. (11) sync-badge shows 'Server sincronizzato' after every save. (12) Tablet forms are centred at most 720px wide with no horizontal overflow. No page errors. Only LOW/MEDIUM quality issues were found (listed below).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Daily PDF filename", "issue": "MEDIUM: fileDate uses now.toISOString().slice(0,10), which is the UTC date. In Italy (UTC+1/+2), between 00:00 and 01:00/02:00 local time (the Notte shift) the file name has yesterday's date while the header shows today. Use local Y-M-D. Reference: /app/frontend/src/utils/daily-sheet.ts:37", "testID": "download-daily-pdf", "priority": "MEDIUM"},
+      {"component": "Daily sheet / Invenduto oggi not filtered by day", "issue": "MEDIUM: buildDailySheet includes ALL tempLogs ever (temps), the last 6 notes from any day and the latest feeding from any day. Costs 'Invenduto oggi' / 'Valore recuperato' also sum ALL returns, not just today's, even though each record has an 'at' timestamp. Over time the 'daily' PDF HACCP table and the daily balance keep growing. Filter by today (local) date. Reference: daily-sheet.ts:33,47,49; index.tsx:375-378", "testID": "download-daily-pdf", "priority": "MEDIUM"},
+      {"component": "Bake schedule semantics", "issue": "LOW: the bake schedule uses timerEndsAt (the end of the CURRENT phase) as the bake time. A 'Da Impastare' batch with a 45-min timer is listed as baking at 22:14. Oven numbers come from index%2. Reference: daily-sheet.ts:8-19", "testID": "download-daily-pdf", "priority": "LOW"},
+      {"component": "Form validation error", "issue": "LOW: the error banner (e.g. 'La quantità iniziale deve essere maggiore di zero.') stays visible after the user fixes the field, until the next submit. Clear the error in onChangeText. Reference: panificio-forms.tsx FormSheet/forms", "testID": "lot-form-error", "priority": "LOW"},
+      {"component": "PDF layout", "issue": "LOW: with seed data plus 1 record, the signature lines (Responsabile produzione/HACCP) and the 'Generato il' footer spill onto an otherwise empty page 2. Page 1 has no footer and there are no page numbers. Reference: daily-pdf.web.ts:60-64", "testID": "download-daily-pdf", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Header 390px", "issues": ["The operator chip row overflows horizontally: 'Luca – Notte' is cut off and 'Amministratore' is hidden off-screen with no scroll hint. Consider wrapping, or shorter labels on mobile."]},
+      {"screen": "Produzione > Registro rinfreschi 390px", "issues": ["The history table header 'RAPPORTO' and '°C' run together (no gap); flex:1 columns are too narrow for the labels."]},
+      {"screen": "Italian formatting", "issues": ["Some numbers use a decimal point instead of the Italian comma: 'Scarto medio 6.6%' (Resoconti) and pH '4.1' in the PDF starter section. The rest of the UI uses commas (91,8%).", "The browser tab <title> is still 'frontend'.", "The reset-demo aria-label 'Ripristina dati demo' uses 'demo' (acceptable, but could be 'dati di esempio')."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_panificio_state.py", "/app/test_reports/pytest/pytest_results_iter6.xml"],
+  "action_items": [
+    "MEDIUM: daily-sheet.ts:37 - build fileDate from local date parts (getFullYear/getMonth/getDate), not toISOString.",
+    "MEDIUM: Filter daily data to today (local) in buildDailySheet (tempLogs, notes, feedings) and in Costs 'Invenduto oggi'/'Valore recuperato' (returns[].at).",
+    "LOW: Clear the form error state when the user edits a field.",
+    "LOW: Fix the PDF layout so the signature block fits on page 1 when possible; add a footer/page number on every page.",
+    "LOW: Use toLocaleString('it-IT') for 'Scarto medio' and the PDF pH value; set the document title (e.g. 'PanificioOS').",
+    "LOW: Mobile header operator chips overflow; the rinfresco table header is cramped at 390px."
+  ],
+  "critical_code_review_comments": [
+    "app/index.tsx is 457 lines but packs whole components and the full StyleSheet onto single very long lines (e.g. lines 305, 349, 455), which is hard to review and maintain. Split Dashboard/Production/Haccp/Costs/Reports into separate files.",
+    "Backend PanificioState still accepts arbitrary dicts for every list (List[dict[str, Any]]), with no per-item schema validation for feedings/tempLogs. This was acceptable for the demo.",
+    "Costs card 'Costo medio / pezzo €0,48', the margin table, 'Resoconti esportati 12' and the report chart are hardcoded/derived placeholders, not real data.",
+    "No deprecated Expo packages found (expo-print/expo-sharing for native PDF, jspdf for web)."
+  ],
+  "updated_files": ["/app/backend/tests/test_panificio_state.py (restore fixture now also restores feedings/tempLogs; 3 new tests)"],
+  "success_rate": {"backend": "100% (9/9)", "frontend": "100% of requested flows (12/12); 5 LOW/MEDIUM quality issues"},
+  "seed_data_creation": "None. The backend demo doc was originally missing, and the frontend re-seeded demo data on first load. All TEST_ records created in the UI (note, feeding, batch, lot, temp log, return) were removed by id afterwards; 0 TEST_ strings remain.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Bottom nav testIDs: nav-oggi, nav-ricettario (NOT nav-ricette), nav-produzione, nav-altro. Sub-tabs: more-haccp/more-costi/more-report. The trace modal close is 'close-trace'; form close is '<form>-close', submit '<form>-submit', error '<form>-error'. Each browser_automation run is a fresh context, so localStorage (operator) resets between runs. Run backend tests with -n 0. Watch out: after the backend tests run against a missing doc they leave an empty doc. The frontend still re-seeds because recipes is empty (sync.ts:65).",
+  "rca_of_issue": ""
+}

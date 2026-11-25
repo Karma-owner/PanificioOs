@@ -1,0 +1,155 @@
+{
+  "app_name": "PanificioOS",
+  "personality": "5 Brutalist Mobile / 1 iOS-Native Clean (Industrial Food ERP)",
+  "personality_one_liner": "High-contrast, flour-dusted industrial bakery ERP designed for rapid shop-floor execution, precise baker's math, and strict HACCP traceability.",
+  "color": {
+    "surface": "#F8F9FA",
+    "onSurface": "#1E293B",
+    "surfaceSecondary": "#FFFFFF",
+    "onSurfaceSecondary": "#0F172A",
+    "surfaceTertiary": "#F1F5F9",
+    "onSurfaceTertiary": "#334155",
+    "surfaceInverse": "#1E293B",
+    "onSurfaceInverse": "#F8F9FA",
+    "brand": "#D97706",
+    "brandPrimary": "#D97706",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#B45309",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#FEF3C7",
+    "onBrandTertiary": "#92400E",
+    "success": "#10B981",
+    "onSuccess": "#FFFFFF",
+    "warning": "#F59E0B",
+    "onWarning": "#1E293B",
+    "error": "#EF4444",
+    "onError": "#FFFFFF",
+    "info": "#0284C7",
+    "onInfo": "#FFFFFF",
+    "border": "#E2E8F0",
+    "borderStrong": "#CBD5E1",
+    "divider": "#E2E8F0",
+    "muted": "#64748B",
+    "onBrand": "#FFFFFF"
+  },
+  "typography": {
+    "displayFontFamily": "System",
+    "textFontFamily": "System",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous touch targets for flour-dusted hands, compact metadata, 8pt rhythm.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "1",
+  "navigation": "bottom_tabs",
+  "icon_set": "Ionicons",
+  "glassmorphism": {
+    "enabled": false,
+    "do's": ["High contrast", "Solid industrial cards", "Clear tap targets"],
+    "dont's": ["Low contrast gray", "Translucent text on noisy backgrounds"]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Dashboard & Passaggio Consegne",
+      "purpose": "Live KPI cards, shift handover notes (Notte/Mattina/Pomeriggio), urgent alerts, and today's baking schedule sorted by oven temperature.",
+      "states": {
+        "loading": "Caricamento dati turno in corso...",
+        "empty": "Nessun dato di produzione registrato per oggi.",
+        "error": "Errore di sincronizzazione con il server del laboratorio."
+      },
+      "layout": "Scrollable vertical dashboard with top operational mode switcher (Bottega / GDO / Industriale), KPI summary cards grid, filterable Shift Handover notes accordion with priority tags, and chronological oven schedule list."
+    },
+    {
+      "name": "Ricettario & Calcolatore",
+      "purpose": "Baker's percentage recipe database, batch scaler by total dough or pieces, water temperature calculator, and EU 1169/2011 allergen label generator.",
+      "states": {
+        "loading": "Caricamento ricette in corso...",
+        "empty": "Nessuna ricetta disponibile nel database.",
+        "error": "Impossibile caricare il ricettario."
+      },
+      "layout": "Grid of 4 preloaded artisan recipes with quick action buttons for scaling and allergen label generation, plus interactive baker's math calculator."
+    },
+    {
+      "name": "Produzione & Fermentazione",
+      "purpose": "Kanban status pipeline from [Da Impastare] to [Sfornato], fermentation timers, and sourdough starter feeding tracker.",
+      "states": {
+        "loading": "Caricamento Kanban di produzione...",
+        "empty": "Nessun lotto attivo in produzione.",
+        "error": "Errore nel caricamento degli stati di fermentazione."
+      },
+      "layout": "Horizontal swipeable or vertical status column Kanban view with timer badges and stage advancement triggers."
+    },
+    {
+      "name": "Magazzino & Tracciabilità HACCP",
+      "purpose": "Raw materials inventory with low-stock warnings, lot traceability, allergen sheets, and temperature logs.",
+      "states": {
+        "loading": "Lettura celle frigorifere e scorte...",
+        "empty": "Nessun materiale in magazzino.",
+        "error": "Impossibile connettersi ai sensori HACCP."
+      },
+      "layout": "Tabbed inventory list with low-stock badges, lot codes, and temperature verification logs."
+    },
+    {
+      "name": "Invenduto, Resi & Costi",
+      "purpose": "End-of-day unsold log, bread crumb/crouton conversion suggestions, and food cost/margin analytics.",
+      "states": {
+        "loading": "Calcolo margini e resi...",
+        "empty": "Nessun reso registrato oggi.",
+        "error": "Errore nel calcolo dei costi di produzione."
+      },
+      "layout": "Financial KPI summary with unsold item breakdown and zero-waste conversion actions."
+    },
+    {
+      "name": "Reportistica & Export",
+      "purpose": "Planned vs actual production charts, waste trend analysis, flour consumption, and print-friendly daily shift sheet.",
+      "states": {
+        "loading": "Generazione reportistica...",
+        "empty": "Dati insufficienti per il periodo selezionato.",
+        "error": "Errore durante la generazione del report PDF."
+      },
+      "layout": "Comparative charts and export action sheet for daily bakery reporting."
+    }
+  ],
+  "images": {
+    "hero_bread": {
+      "url": "https://images.unsplash.com/photo-1549413468-cd78edb7e75c?auto=format&fit=crop&q=85&w=800",
+      "alt": "Artisan sourdough bread loaf on rustic wood table"
+    },
+    "bakery_lab": {
+      "url": "https://images.unsplash.com/photo-1790156590790-fbd2239d1ecf?auto=format&fit=crop&q=85&w=800",
+      "alt": "Commercial bakery stainless steel kitchen and oven"
+    }
+  },
+  "instructions_to_main_agent": "Build PanificioOS in React Native with full tablet responsiveness (768-1024px support), 3 operational modes (Bottega Artigianale, GDO, Industriale), 4 preloaded Italian recipes with EU 1169/2011 allergen labels, shift handover notes with Notte/Mattina/Pomeriggio filters and priority tags, Baker's math calculator, Kanban production pipeline, HACCP logs, and inventory management. Use the Flour & Slate color palette (#F8F9FA background, #1E293B slate sidebar, #D97706 terracotta/crust orange accents). Ensure touch targets are large for flour-dusted hands."
+}
