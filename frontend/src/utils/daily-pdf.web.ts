@@ -17,7 +17,7 @@ export async function exportDailyPdf(sheet: DailySheet): Promise<string> {
   doc.setTextColor(...ACCENT).setFont("helvetica", "bold").setFontSize(9).text("PANIFICIOOS - LABORATORIO", left, y);
   doc.setTextColor(...INK).setFontSize(18).text(sheet.isToday ? "Foglio di lavoro giornaliero" : "Archivio giornata - Registri HACCP", left, y + 8);
   doc.setFont("helvetica", "normal").setFontSize(9).setTextColor(...GREY);
-  [`Data: ${sheet.date}`, `Turno: ${sheet.shift}`, `Operatore: ${clean(sheet.operator)}`, `Modalità: ${sheet.mode}`].forEach((line, i) => doc.text(line, 196, y + i * 4.5, { align: "right" }));
+  [`Data: ${sheet.date}`, `Turno: ${sheet.shift}`, `Operatore: ${clean(sheet.operator)}`, `Laboratorio: ${clean(sheet.lab)}`].forEach((line, i) => doc.text(line, 196, y + i * 4.5, { align: "right" }));
   y += 20;
   doc.setDrawColor(...ACCENT).setLineWidth(0.8).line(left, y, 196, y);
   y += 6;

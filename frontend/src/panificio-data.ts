@@ -37,13 +37,6 @@ export type AppState = {
   tempLogs: TempLog[];
 };
 
-export const operators = ["Mario – Capoturno", "Luca – Notte", "Amministratore"];
-export const tempAreas = [
-  { area: "Cella 1", min: 0, max: 5 },
-  { area: "Cella 2", min: 0, max: 5 },
-  { area: "Frigo lieviti", min: 2, max: 6 },
-  { area: "Abbattitore", min: -40, max: -18 },
-];
 export const returnDestinations = [
   { label: "Pangrattato", pricePerKg: 2 },
   { label: "Grissini", pricePerKg: 3 },
@@ -185,3 +178,6 @@ export function makeDemoState(): AppState {
 export const demoState: AppState = makeDemoState();
 
 export const stages: ProductionStage[] = ["Da Impastare", "In Puntata", "In Cella", "Formatura", "In Forno", "Sfornato"];
+
+/** Laboratorio nuovo: tutto vuoto, lo configura l'amministratore. */
+export const emptyState = (): AppState => ({ mode: "", notes: [], batches: [], stock: [], returns: [], recipes: [], feedings: [], tempLogs: [] });

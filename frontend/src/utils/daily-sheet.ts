@@ -42,7 +42,7 @@ const byNewest = <T extends { at?: string }>(a: T, b: T) => new Date(b.at ?? 0).
  * Scaletta e impasti in corso sono mostrati solo per la giornata odierna; per i giorni passati
  * si riportano i lotti creati in quella data.
  */
-export function buildDailySheet(state: AppState, operator: string, day: Date = new Date()) {
+export function buildDailySheet(state: AppState, operator: string, day: Date = new Date(), labName = "") {
   const now = new Date();
   const isToday = dayKey(day) === dayKey(now);
   const temps = state.tempLogs.filter((log) => onDay(log.at, day)).sort(byNewest);
@@ -55,7 +55,7 @@ export function buildDailySheet(state: AppState, operator: string, day: Date = n
     printedAt: now.toLocaleString("it-IT"),
     shift: isToday ? currentShift(now) : "Archivio giornata",
     operator,
-    mode: state.mode,
+    lab: labName,
     schedule: isToday ? bakeSchedule(state) : [],
     doughs: batches.map((batch) => {
       const recipe = state.recipes.find((item) => item.id === batch.recipeId);

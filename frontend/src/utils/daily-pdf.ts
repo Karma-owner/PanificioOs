@@ -27,7 +27,7 @@ export function dailySheetHtml(sheet: DailySheet): string {
   .sign { display: flex; gap: 30px; margin-top: 26px; } .sign div { flex: 1; border-top: 1px solid ${INK}; padding-top: 4px; color: ${GREY}; }
   </style></head><body>
   <div class="head"><div><div class="brand">PANIFICIOOS · LABORATORIO</div><h1>${sheet.isToday ? "Foglio di lavoro giornaliero" : "Archivio giornata · Registri HACCP"}</h1></div>
-  <div class="meta">Data: <b>${esc(sheet.date)}</b><br/>Turno: <b>${esc(sheet.shift)}</b><br/>Operatore: <b>${esc(sheet.operator)}</b><br/>Modalità: ${esc(sheet.mode)}</div></div>
+  <div class="meta">Data: <b>${esc(sheet.date)}</b><br/>Turno: <b>${esc(sheet.shift)}</b><br/>Operatore: <b>${esc(sheet.operator)}</b><br/>Laboratorio: ${esc(sheet.lab)}</div></div>
   <h2>Scaletta delle infornate</h2>${table(["Ora", "Forno", "Prodotto", "Quantità", "Fase"], sheet.schedule.map((r) => [r.time, r.oven, r.product, r.quantity, r.stage]))}
   <h2>Riepilogo impasti</h2>${table(["Prodotto", "Quantità", "Idratazione", "Farina scaricata", "Fase", "Firmato da"], sheet.doughs.map((d) => [d.product, d.quantity, d.hydration, d.flour, d.stage, d.operator]))}
   <h2>Registro temperature HACCP</h2>${sheet.temps.length === 0 ? `<p class="empty">Nessun controllo registrato.</p>` : `<table><thead><tr><th>Area</th><th>Rilevato</th><th>Intervallo</th><th>Esito</th><th>Data/Ora</th><th>Firma</th></tr></thead><tbody>${sheet.temps.map((t) => `<tr><td>${esc(t.area)}</td><td>${esc(t.value)}</td><td>${esc(t.range)}</td><td class="${t.ok ? "" : "ko"}">${t.ok ? "Conforme" : "NON CONFORME"}</td><td>${esc(t.time)}</td><td>${esc(t.operator)}</td></tr>`).join("")}</tbody></table>`}

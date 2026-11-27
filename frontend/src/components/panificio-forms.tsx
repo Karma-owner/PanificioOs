@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import type { SetStateAction } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { IconButton } from "@/src/components/panificio-ui";
-import { AppState, bindingOptions, feedRatios, Recipe, returnDestinations, solidRatios, StarterType, tempAreas } from "@/src/panificio-data";
+import { AppState, bindingOptions, feedRatios, Recipe, returnDestinations, solidRatios, StarterType } from "@/src/panificio-data";
 import { useTheme } from "@/src/theme";
+import { useLab } from "@/src/utils/lab";
 
 export type FormKind = "feeding-licoli" | "feeding-madre" | "lot" | "batch" | "return" | "temp";
 type Submit = (updater: SetStateAction<AppState>) => void;
@@ -203,20 +204,25 @@ function ReturnForm({ recipes, operator, onClose, onSubmit }: { recipes: Recipe[
 }
 
 function TempForm({ operator, onClose, onSubmit }: { operator: string; onClose: () => void; onSubmit: Submit }) {
-  const [area, setArea] = useState(tempAreas[0].area);
+  const { colors } = useTheme();
+  const { tempAreas } = useLab();
+  const [area, setArea] = useState(tempAreas[0]?.area ?? "");
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   useEffect(() => setError(""), [area, value]);
   const target = tempAreas.find((item) => item.area === area) ?? tempAreas[0];
   const save = () => {
+    if (!target) return setError("Nessuna cella impostata: l'amministratore può aggiungerle in Impostazioni.");
     const reading = parseNum(value);
     if (Number.isNaN(reading) || reading < -40 || reading > 40) return setError("Inserisci la temperatura rilevata (tra −40 e 40 °C).");
-    onSubmit((current) => ({ ...current, tempLogs: [{ id: uid("t"), area, value: reading, min: target.min, max: target.max, at: new Date().toISOString(), operator }, ...current.tempLogs] }));
+    onSubmit((current) => ({ ...current, tempLogs: [{ id: uid("t"), area: target.area, value: reading, min: target.min, max: target.max, at: new Date().toISOString(), operator }, ...current.tempLogs] }));
     onClose();
   };
   return <FormSheet testID="temp-form" eyebrow="REGISTRO TEMPERATURE HACCP" title="Nuovo controllo" error={error} submitLabel="Firma e registra" onClose={onClose} onSubmit={save}>
-    <Chips testIDPrefix="temp-area" label="Area di conservazione *" options={tempAreas.map((item) => item.area)} value={area} onChange={setArea} />
-    <Field testID="temp-value" label="Temperatura rilevata (°C) *" value={value} onChangeText={setValue} placeholder={target.max < 0 ? "-18,5" : "4,0"} numeric hint={`Intervallo ammesso: ${target.min <= -40 ? `≤ ${target.max}` : `${target.min}–${target.max}`} °C`} />
+    {target ? <>
+      <Chips testIDPrefix="temp-area" label="Area di conservazione *" options={tempAreas.map((item) => item.area)} value={target.area} onChange={setArea} />
+      <Field testID="temp-value" label="Temperatura rilevata (°C) *" value={value} onChangeText={setValue} placeholder={target.max < 0 ? "-18,5" : "4,0"} numeric hint={`Intervallo ammesso: ${target.min <= -40 ? `≤ ${target.max}` : `${target.min}–${target.max}`} °C`} />
+    </> : <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 20, marginBottom: 12 }}>Non ci sono celle o frigoriferi impostati. L&apos;amministratore del laboratorio può aggiungerli, con le relative soglie, dalla scheda Impostazioni.</Text>}
     <SignedBy operator={operator} />
   </FormSheet>;
 }

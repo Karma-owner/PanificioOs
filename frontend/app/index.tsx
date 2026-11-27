@@ -17,7 +17,7 @@ import {
   View,
 } from "react-native";
 import { Card, IconButton, MetricCard, SectionTitle, StatusPill } from "@/src/components/panificio-ui";
-import { AppState, Batch, Feeding, HandoverNote, Priority, Recipe, Shift, StarterType, stages, starterOf, starterTypes, starterLabel, latestFeeding, demoState, makeDemoState, operators, currentShift, feedingPeak, formatClock, formatDateTime, formatRange, formatTemp } from "@/src/panificio-data";
+import { AppState, Batch, Feeding, HandoverNote, Priority, Recipe, Shift, StarterType, stages, starterOf, starterTypes, starterLabel, latestFeeding, emptyState, makeDemoState, currentShift, feedingPeak, formatClock, formatDateTime, formatRange, formatTemp } from "@/src/panificio-data";
 import { enqueueSave, loadInitialState, pollRemote, remainingFromIso, resetRemote, subscribeSync, type SyncStatus } from "@/src/utils/sync";
 import { PanificioForms, type FormKind } from "@/src/components/panificio-forms";
 import { bakeSchedule, buildDailySheet, latestTempLogs, tempOk } from "@/src/utils/daily-sheet";
@@ -25,31 +25,44 @@ import { archiveDays, dateFromKey, dayKey, deductFlour, matchStockForIngredient,
 import { exportDailyPdf } from "@/src/utils/daily-pdf";
 import { storage } from "@/src/utils/storage";
 import { useTheme } from "@/src/theme";
+import { QuickGuide } from "@/src/components/quick-guide";
+import { RecipeEditor } from "@/src/components/recipe-editor";
+import { RegulatoryFeed } from "@/src/components/regulatory-feed";
+import { SettingsScreen, SetupChecklist } from "@/src/components/settings";
+import { confirmAsync } from "@/src/utils/confirm";
+import { useAuth } from "@/src/utils/auth";
+import { useLab } from "@/src/utils/lab";
 
-type Area = "oggi" | "ricettario" | "produzione" | "altro";
+type Area = "oggi" | "ricettario" | "produzione" | "altro" | "impostazioni";
 type MoreArea = "haccp" | "costi" | "report";
 
-const modeOptions = ["Bottega Artigianale", "Reparto GDO", "Industriale"];
 const shiftOptions: Shift[] = ["Notte", "Mattina", "Pomeriggio"];
 const priorityOptions: Priority[] = ["Normale", "Urgente", "Manutenzione"];
 const OPERATOR_KEY = "panificio_operator";
 
 export default function Index() {
   const { colors } = useTheme();
+  const lab = useLab();
+  const [showGuide, setShowGuide] = useState(false);
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const tablet = width >= 700;
   const [area, setArea] = useState<Area>("oggi");
   const [moreArea, setMoreArea] = useState<MoreArea>("haccp");
-  const [state, setState] = useState<AppState>(demoState);
+  const [state, setState] = useState<AppState>(emptyState);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [traceBatch, setTraceBatch] = useState<Batch | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [sync, setSync] = useState<SyncStatus>("syncing");
   const [, setTick] = useState(0);
-  const [operator, setOperatorState] = useState(operators[0]);
+  const [operator, setOperatorState] = useState(lab.operators[0]);
   const [form, setForm] = useState<FormKind | null>(null);
   const localEditRef = useRef(false);
+
+  // Se l'amministratore toglie l'operatore selezionato, si passa al primo disponibile.
+  useEffect(() => {
+    if (!lab.operators.includes(operator)) setOperatorState(lab.operators[0]);
+  }, [lab.operators, operator]);
 
   const setOperator = (value: string) => {
     setOperatorState(value);
@@ -58,9 +71,9 @@ export default function Index() {
 
   useEffect(() => {
     (async () => {
-      const savedOperator = await storage.getItem(OPERATOR_KEY, operators[0]);
-      if (typeof savedOperator === "string" && operators.includes(savedOperator)) setOperatorState(savedOperator);
-      const initial = await loadInitialState(makeDemoState());
+      const savedOperator = await storage.getItem(OPERATOR_KEY, lab.operators[0]);
+      if (typeof savedOperator === "string" && lab.operators.includes(savedOperator)) setOperatorState(savedOperator);
+      const initial = await loadInitialState(emptyState());
       setState(initial);
       setLoaded(true);
     })();
@@ -94,33 +107,29 @@ export default function Index() {
     setState(updater);
   };
 
-  const resetDemo = () => {
-    const run = async () => {
-      const fresh = await resetRemote(makeDemoState());
-      setState(fresh);
-    };
-    if (Platform.OS === "web") {
-      if (typeof window !== "undefined" && window.confirm("Ripristinare tutti i dati demo?")) void run();
-    } else {
-      Alert.alert("Ripristina demo", "Tutti i dati inseriti verranno sostituiti dal dataset iniziale.", [
-        { text: "Annulla", style: "cancel" },
-        { text: "Ripristina", style: "destructive", onPress: () => void run() },
-      ]);
-    }
+  const resetDemo = async () => {
+    const ok = await confirmAsync("Caricare i dati di esempio?", "Ricette, scorte, lotti e note attuali saranno sostituiti da un laboratorio di esempio. I registri HACCP già salvati non vengono toccati.", "Carica");
+    if (!ok) return;
+    const fresh = await resetRemote(makeDemoState());
+    setState(fresh);
   };
 
   if (!loaded) return <View style={[styles.loading, { backgroundColor: colors.surface }]}><ActivityIndicator color={colors.brand} size="large" /><Text style={[styles.loadingText, { color: colors.muted }]}>Caricamento laboratorio...</Text></View>;
 
   return <View style={[styles.root, { backgroundColor: colors.surface }]}>
     <View style={[styles.appShell, { paddingTop: insets.top + 10, paddingBottom: insets.bottom, maxWidth: tablet ? 1240 : 760 }]}>
-      <Header state={state} tablet={tablet} sync={sync} operator={operator} onOperator={setOperator} onMode={(mode) => updateState((current) => ({ ...current, mode }))} onReset={resetDemo} />
+      <Header labName={lab.labName} sync={sync} operator={operator} onOperator={setOperator} operators={lab.operators} onGuide={() => setShowGuide(true)} />
+      <QuickGuide visible={showGuide} isAdmin={lab.isAdmin} onClose={() => setShowGuide(false)} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingHorizontal: tablet ? 32 : 20 }]}>
+        {area === "oggi" && lab.isAdmin ? <SetupChecklist recipesCount={state.recipes.length} onOpenSettings={() => setArea("impostazioni")} onOpenRecipes={() => setArea("ricettario")} /> : null}
         {area === "oggi" ? <Dashboard state={state} tablet={tablet} setState={updateState} operator={operator} onOpenHaccp={() => { setArea("altro"); setMoreArea("haccp"); }} onOpenProduction={() => setArea("produzione")} /> : null}
-        {area === "ricettario" ? <Recipes recipes={state.recipes} tablet={tablet} onSelectRecipe={setSelectedRecipe} /> : null}
+        {area === "oggi" ? <RegulatoryFeed /> : null}
+        {area === "ricettario" ? <Recipes recipes={state.recipes} tablet={tablet} onSelectRecipe={setSelectedRecipe} isAdmin={lab.isAdmin} setState={updateState} /> : null}
         {area === "produzione" ? <Production state={state} tablet={tablet} setState={updateState} operator={operator} onTrace={setTraceBatch} onOpenForm={setForm} /> : null}
+        {area === "impostazioni" && lab.isAdmin ? <SettingsScreen onLoadDemo={() => void resetDemo()} /> : null}
         {area === "altro" ? <More state={state} tablet={tablet} operator={operator} area={moreArea} setArea={setMoreArea} onTrace={setTraceBatch} onOpenForm={setForm} /> : null}
       </ScrollView>
-      <BottomNav area={area} setArea={setArea} colors={colors} />
+      <BottomNav area={area} setArea={setArea} colors={colors} admin={lab.isAdmin} />
       <AllergenModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
       <TraceabilityModal batch={traceBatch} state={state} onClose={() => setTraceBatch(null)} />
       <PanificioForms kind={form} recipes={state.recipes} operator={operator} onClose={() => setForm(null)} onSubmit={updateState} />
@@ -141,25 +150,23 @@ function SyncBadge({ status }: { status: SyncStatus }) {
   </View>;
 }
 
-function Header({ state, tablet, sync, operator, onOperator, onMode, onReset }: { state: AppState; tablet: boolean; sync: SyncStatus; operator: string; onOperator: (value: string) => void; onMode: (mode: string) => void; onReset: () => void }) {
+function Header({ labName, sync, operator, onOperator, operators, onGuide }: { labName: string; sync: SyncStatus; operator: string; onOperator: (value: string) => void; operators: string[]; onGuide: () => void }) {
   const { colors } = useTheme();
+  const { signOut } = useAuth();
   return <View style={styles.header}>
     <View style={styles.brandRow}>
       <View style={[styles.logo, { backgroundColor: colors.brand }]}><Ionicons name="flame" size={20} color={colors.onBrand} /></View>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.appName, { color: colors.onSurface }]}>PanificioOS</Text>
+        <Text testID="lab-name" numberOfLines={1} style={[styles.appName, { color: colors.onSurface }]}>{labName}</Text>
         <View style={styles.captionRow}>
-          <Text style={[styles.appCaption, { color: colors.muted }]} numberOfLines={1}>Laboratorio · {new Date().toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}</Text>
+          <Text style={[styles.appCaption, { color: colors.muted }]} numberOfLines={1}>PanificioOS · {new Date().toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" })}</Text>
           <SyncBadge status={sync} />
+          <Pressable testID="open-guide" accessibilityLabel="Guida rapida" onPress={onGuide} hitSlop={10}><Text style={{ color: colors.brand, fontSize: 11, fontWeight: "900" }}>Guida</Text></Pressable>
+          <Pressable testID="logout" accessibilityLabel="Esci dall'account" onPress={() => void signOut()} hitSlop={10}><Text style={{ color: colors.brand, fontSize: 11, fontWeight: "900" }}>Esci</Text></Pressable>
         </View>
       </View>
-      <View style={styles.headerActions}>
-        <View style={[styles.modeSwitch, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}><Ionicons name="layers-outline" size={16} color={colors.brand} /><Text style={[styles.modeLabel, { color: colors.onSurface }]} numberOfLines={1}>{tablet ? state.mode : state.mode.split(" ")[0]}</Text></View>
-        <IconButton testID="reset-demo" icon="refresh-outline" label="Ripristina dati demo" onPress={onReset} />
-      </View>
     </View>
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.modeOptions}>{modeOptions.map((mode) => <Pressable testID={`mode-${mode}`} key={mode} onPress={() => onMode(mode)} style={[styles.modeOption, { backgroundColor: state.mode === mode ? colors.brandTertiary : colors.surfaceTertiary }]}><Text style={[styles.modeOptionText, { color: state.mode === mode ? colors.onBrandTertiary : colors.onSurfaceTertiary }]}>{mode}</Text></Pressable>)}</ScrollView>
-    <OperatorSelector operator={operator} onOperator={onOperator} />
+    <OperatorSelector operator={operator} onOperator={onOperator} operators={operators} />
   </View>;
 }
 
@@ -167,7 +174,7 @@ function Header({ state, tablet, sync, operator, onOperator, onMode, onReset }: 
  * Selettore operatore: su tablet (≥ 768px) pulsanti affiancati,
  * su smartphone menu a tendina compatto per evitare lo scorrimento orizzontale.
  */
-function OperatorSelector({ operator, onOperator }: { operator: string; onOperator: (value: string) => void }) {
+function OperatorSelector({ operator, onOperator, operators }: { operator: string; onOperator: (value: string) => void; operators: string[] }) {
   const { colors } = useTheme();
   const compact = useWindowDimensions().width < 768;
   const [open, setOpen] = useState(false);
@@ -211,6 +218,7 @@ function StarterAlerts({ state, onOpen }: { state: AppState; onOpen: () => void 
 }
 
 function Dashboard({ state, tablet, setState, operator, onOpenHaccp, onOpenProduction }: { state: AppState; tablet: boolean; setState: Dispatch<SetStateAction<AppState>>; operator: string; onOpenHaccp: () => void; onOpenProduction: () => void }) {
+  const { labName } = useLab();
   const { colors } = useTheme();
   const [shift, setShift] = useState<Shift | "Tutti">("Tutti");
   const [notePriority, setNotePriority] = useState<Priority>("Normale");
@@ -230,7 +238,7 @@ function Dashboard({ state, tablet, setState, operator, onOpenHaccp, onOpenProdu
   const schedule = bakeSchedule(state).slice(0, 4);
   const stageTone = (stage: string) => stage === "In Forno" ? "brand" as const : stage === "In Cella" ? "success" as const : "info" as const;
   return <View>
-    <View style={styles.welcomeRow}><View style={{ flex: 1 }}><Text style={[styles.eyebrowLarge, { color: colors.brand }]}>QUADRO GENERALE</Text><Text style={[styles.pageTitle, { color: colors.onSurface }]}>Buongiorno, laboratorio</Text><Text style={[styles.pageSubtitle, { color: colors.muted }]}>Turno {currentShift()} · Operatore {operator}</Text></View><View style={[styles.liveBadge, { backgroundColor: colors.success }]}><View style={styles.liveDot} /><Text style={{ color: colors.onSuccess, fontWeight: "800", fontSize: 12 }}>IN DIRETTA</Text></View></View>
+    <View style={styles.welcomeRow}><View style={{ flex: 1 }}><Text style={[styles.eyebrowLarge, { color: colors.brand }]}>QUADRO GENERALE</Text><Text style={[styles.pageTitle, { color: colors.onSurface }]}>Buongiorno, {labName}</Text><Text style={[styles.pageSubtitle, { color: colors.muted }]}>Turno {currentShift()} · Operatore {operator}</Text></View><View style={[styles.liveBadge, { backgroundColor: colors.success }]}><View style={styles.liveDot} /><Text style={{ color: colors.onSuccess, fontWeight: "800", fontSize: 12 }}>IN DIRETTA</Text></View></View>
     <StarterAlerts state={state} onOpen={onOpenProduction} />
     <Text style={[styles.groupLabel, { color: colors.muted }]}>INDICATORI CHIAVE DI PRESTAZIONE</Text>
     <View style={[styles.kpiGrid, tablet ? styles.kpiGridTablet : null]}><MetricCard icon="scale-outline" value="486 kg" label="Kg impastati oggi" detail="+8,4% rispetto a ieri" /><MetricCard icon="pie-chart-outline" value="91,8%" label="Resa media cottura" detail="Obiettivo 90%" tone="success" /><MetricCard icon="timer-outline" value={String(activeInProofing)} label="Impasti in lievitazione" detail={`${state.batches.length} lotti attivi`} tone="info" /><MetricCard icon="warning-outline" value={String(operationalAlerts + haccpAlerts.length)} label="Allerte operative" detail={`${operationalAlerts} scorte · ${haccpAlerts.length} HACCP`} tone="warning" /></View>
@@ -248,18 +256,39 @@ function Dashboard({ state, tablet, setState, operator, onOpenHaccp, onOpenProdu
 
 function FilterChip({ label, active, onPress, testID }: { label: string; active: boolean; onPress: () => void; testID?: string }) { const { colors } = useTheme(); return <Pressable testID={testID} onPress={onPress} style={[styles.filterChip, { backgroundColor: active ? colors.brand : colors.surfaceTertiary, borderColor: active ? colors.brand : colors.border }]}><Text style={{ color: active ? colors.onBrand : colors.onSurfaceTertiary, fontSize: 12, fontWeight: "800" }}>{label}</Text></Pressable>; }
 
-function Recipes({ recipes, tablet, onSelectRecipe }: { recipes: Recipe[]; tablet: boolean; onSelectRecipe: (recipe: Recipe) => void }) {
+function Recipes({ recipes, tablet, onSelectRecipe, isAdmin, setState }: { recipes: Recipe[]; tablet: boolean; onSelectRecipe: (recipe: Recipe) => void; isAdmin: boolean; setState: Dispatch<SetStateAction<AppState>> }) {
   const { colors } = useTheme();
-  const [activeRecipe, setActiveRecipe] = useState(recipes[0]);
+  const [activeId, setActiveId] = useState(recipes[0]?.id ?? "");
+  const activeRecipe = recipes.find((item) => item.id === activeId) ?? recipes[0];
   const [target, setTarget] = useState("15000");
   const [ambient, setAmbient] = useState("24"); const [flourTemp, setFlourTemp] = useState("22"); const [desired, setDesired] = useState("25"); const [mixer, setMixer] = useState("5");
+  const [editing, setEditing] = useState<Recipe | "new" | null>(null);
+  const saveRecipe = (recipe: Recipe) => {
+    setState((current) => ({ ...current, recipes: current.recipes.some((item) => item.id === recipe.id) ? current.recipes.map((item) => (item.id === recipe.id ? recipe : item)) : [...current.recipes, recipe] }));
+    setActiveId(recipe.id);
+    setEditing(null);
+  };
+  const deleteRecipe = async () => {
+    if (!editing || editing === "new") return;
+    const target = editing;
+    const ok = await confirmAsync("Eliminare la ricetta?", `«${target.name}» sarà rimossa dal ricettario. I lotti già prodotti restano nello storico.`, "Elimina");
+    if (!ok) return;
+    setState((current) => ({ ...current, recipes: current.recipes.filter((item) => item.id !== target.id) }));
+    setActiveId("");
+    setEditing(null);
+  };
+  const editorEl = isAdmin ? <RecipeEditor visible={editing !== null} recipe={editing && editing !== "new" ? editing : null} onClose={() => setEditing(null)} onSave={saveRecipe} onDelete={editing && editing !== "new" ? () => void deleteRecipe() : undefined} /> : null;
+  const newButton = isAdmin ? <Pressable testID="recipe-new" onPress={() => setEditing("new")} style={[styles.primaryButton, { backgroundColor: colors.brand, alignSelf: "flex-start", marginBottom: 16 }]}><Ionicons name="add" size={16} color={colors.onBrand} /><Text style={{ color: colors.onBrand, fontWeight: "800", fontSize: 12 }}>Nuova ricetta</Text></Pressable> : null;
+  if (!activeRecipe) return <View><PageIntro eyebrow="RICETTARIO" title="Nessuna ricetta" subtitle={isAdmin ? "Inserisci la prima ricetta del laboratorio: ingredienti in percentuale e allergeni." : "L'amministratore non ha ancora inserito ricette."} />{newButton}{editorEl}</View>;
   const total = activeRecipe.ingredients.reduce((sum, ingredient) => sum + ingredient.grams, 0);
   const scale = Math.max(Number(target) || 1, 1) / total;
   const waterTemp = (Number(desired) * 3 - Number(ambient) - Number(flourTemp) - Number(mixer)).toFixed(1);
   return <View><PageIntro eyebrow="RICETTARIO DINAMICO" title="Ricette e percentuali del panettiere" subtitle="Formula, resa e allergeni sempre pronti per il banco di lavoro." />
-    <View style={styles.recipeGrid}>{recipes.map((recipe) => <Card key={recipe.id} style={tablet ? styles.recipeCardTablet : undefined}><View style={styles.recipeTop}><StatusPill label={recipe.category} tone={recipe.accent === "brand" ? "brand" : recipe.accent} /><Text style={[styles.recipeYield, { color: colors.muted }]}>{recipe.yield}</Text></View><Text style={[styles.recipeName, { color: colors.onSurface }]}>{recipe.name}</Text><View style={styles.recipeStats}><MiniStat label="Idratazione" value={`${recipe.hydration}%`} /><MiniStat label="Calo cottura" value={`${recipe.loss}%`} /><MiniStat label="Metodo" value={recipe.method.split(" · ")[0]} /></View><View style={styles.recipeActions}><Pressable testID={`calc-${recipe.id}`} onPress={() => setActiveRecipe(recipe)} style={[styles.outlineButton, { borderColor: colors.borderStrong }]}><Ionicons name="calculator-outline" size={16} color={colors.brand} /><Text style={[styles.outlineButtonText, { color: colors.onSurface }]}>Calcola</Text></Pressable><Pressable testID={`allergen-${recipe.id}`} onPress={() => onSelectRecipe(recipe)} style={[styles.primaryButton, { backgroundColor: colors.surfaceInverse }]}><Ionicons name="pricetag-outline" size={16} color={colors.onSurfaceInverse} /><Text style={{ color: colors.onSurfaceInverse, fontWeight: "800", fontSize: 12 }}>Etichetta allergeni</Text></Pressable></View></Card>)}</View>
+    {newButton}
+    <View style={styles.recipeGrid}>{recipes.map((recipe) => <Card key={recipe.id} style={tablet ? styles.recipeCardTablet : undefined}><View style={styles.recipeTop}><StatusPill label={recipe.category} tone={recipe.accent === "brand" ? "brand" : recipe.accent} /><Text style={[styles.recipeYield, { color: colors.muted }]}>{recipe.yield}</Text></View><Text style={[styles.recipeName, { color: colors.onSurface }]}>{recipe.name}</Text><View style={styles.recipeStats}><MiniStat label="Idratazione" value={`${recipe.hydration}%`} /><MiniStat label="Calo cottura" value={`${recipe.loss}%`} /><MiniStat label="Metodo" value={recipe.method.split(" · ")[0]} /></View><View style={styles.recipeActions}><Pressable testID={`calc-${recipe.id}`} onPress={() => setActiveId(recipe.id)} style={[styles.outlineButton, { borderColor: colors.borderStrong }]}><Ionicons name="calculator-outline" size={16} color={colors.brand} /><Text style={[styles.outlineButtonText, { color: colors.onSurface }]}>Calcola</Text></Pressable><Pressable testID={`allergen-${recipe.id}`} onPress={() => onSelectRecipe(recipe)} style={[styles.primaryButton, { backgroundColor: colors.surfaceInverse }]}><Ionicons name="pricetag-outline" size={16} color={colors.onSurfaceInverse} /><Text style={{ color: colors.onSurfaceInverse, fontWeight: "800", fontSize: 12 }}>Etichetta allergeni</Text></Pressable>{isAdmin ? <Pressable testID={`edit-${recipe.id}`} accessibilityLabel="Modifica ricetta" onPress={() => setEditing(recipe)} style={[styles.outlineButton, { borderColor: colors.borderStrong }]}><Ionicons name="create-outline" size={16} color={colors.brand} /><Text style={[styles.outlineButtonText, { color: colors.onSurface }]}>Modifica</Text></Pressable> : null}</View></Card>)}</View>
     <Card><SectionTitle eyebrow="Percentuali del panettiere" title={activeRecipe.name} /><Text style={[styles.cardIntro, { color: colors.muted }]}>Scala l&apos;impasto per peso totale. Le quantità sono espresse in grammi e ordinate per formula.</Text><View style={styles.calculatorRow}><View style={styles.field}><Text style={[styles.fieldLabel, { color: colors.muted }]}>Impasto desiderato (g)</Text><TextInput testID="scale-input" value={target} onChangeText={setTarget} keyboardType="numeric" style={[styles.fieldInput, { backgroundColor: colors.surfaceTertiary, color: colors.onSurface, borderColor: colors.border }]} /></View><View style={[styles.resultBox, { backgroundColor: colors.brandTertiary }]}><Text style={[styles.resultLabel, { color: colors.onBrandTertiary }]}>Fattore scala</Text><Text style={[styles.resultValue, { color: colors.onBrandTertiary }]}>{scale.toFixed(2)}×</Text></View></View>{activeRecipe.ingredients.map((ingredient) => <View key={ingredient.name} style={[styles.ingredientRow, { borderBottomColor: colors.divider }]}><Text style={[styles.ingredientName, { color: colors.onSurface }]}>{ingredient.name}</Text><Text style={[styles.ingredientPercent, { color: colors.muted }]}>{ingredient.baker}%</Text><Text style={[styles.ingredientGrams, { color: colors.brand }]}>{Math.round(ingredient.grams * scale).toLocaleString("it-IT")} g</Text></View>)}<Text style={[styles.methodNote, { color: colors.muted }]}><Ionicons name="bulb-outline" size={15} color={colors.brand} /> {activeRecipe.method}</Text></Card>
     <Card><SectionTitle eyebrow="Regola dei 3" title="Calcolatore temperatura acqua" /><View style={styles.inputGrid}>{[["Ambiente", ambient, setAmbient], ["Farina", flourTemp, setFlourTemp], ["Impasto desiderato", desired, setDesired], ["Fattore impastatrice", mixer, setMixer]].map(([label, value, setter]) => <View key={String(label)} style={styles.field}><Text style={[styles.fieldLabel, { color: colors.muted }]}>{String(label)} °C</Text><TextInput value={String(value)} onChangeText={setter as (value: string) => void} keyboardType="numeric" style={[styles.fieldInput, { backgroundColor: colors.surfaceTertiary, color: colors.onSurface, borderColor: colors.border }]} /></View>)}</View><View style={[styles.tempResult, { backgroundColor: colors.surfaceInverse }]}><Ionicons name="water-outline" size={24} color={colors.brand} /><View style={{ flex: 1 }}><Text style={[styles.tempLabel, { color: colors.onSurfaceInverse }]}>Temperatura acqua consigliata</Text><Text style={[styles.tempFormula, { color: colors.muted }]}>({desired} × 3) − {ambient} − {flourTemp} − {mixer}</Text></View><Text style={[styles.tempValue, { color: colors.brand }]}>{waterTemp}°C</Text></View></Card>
+  {editorEl}
   </View>;
 }
 
@@ -476,6 +505,7 @@ function Costs({ state, onOpenForm }: { state: AppState; onOpenForm: (kind: Form
 }
 
 function Reports({ state, operator }: { state: AppState; operator: string }) {
+  const lab = useLab();
   const { colors } = useTheme();
   const planned = useMemo(() => {
     const seed = state.batches.length * 42 + state.recipes.length * 7;
@@ -499,7 +529,7 @@ function Reports({ state, operator }: { state: AppState; operator: string }) {
   // Archivio giornate per ispezioni ASL: oggi + ogni giorno con almeno un registro.
   const days = useMemo(() => archiveDays(state), [state]);
   const [selectedDay, setSelectedDay] = useState(dayKey(new Date()));
-  const sheet = useMemo(() => buildDailySheet(state, operator, dateFromKey(selectedDay)), [state, operator, selectedDay]);
+  const sheet = useMemo(() => buildDailySheet(state, operator, dateFromKey(selectedDay), lab.labName), [state, operator, selectedDay, lab.labName]);
   const downloadPdf = async () => {
     setExporting(true); setExportMsg("");
     try {
@@ -547,7 +577,7 @@ function Reports({ state, operator }: { state: AppState; operator: string }) {
 
 function PageIntro({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) { const { colors } = useTheme(); return <View style={styles.pageIntro}><Text style={[styles.eyebrowLarge, { color: colors.brand }]}>{eyebrow}</Text><Text style={[styles.pageTitle, { color: colors.onSurface }]}>{title}</Text><Text style={[styles.pageSubtitle, { color: colors.muted }]}>{subtitle}</Text></View>; }
 
-function BottomNav({ area, setArea, colors }: { area: Area; setArea: (area: Area) => void; colors: ReturnType<typeof useTheme>["colors"] }) { const items: [Area, keyof typeof Ionicons.glyphMap, string][] = [["oggi", "grid-outline", "Oggi"], ["ricettario", "book-outline", "Ricette"], ["produzione", "git-branch-outline", "Produzione"], ["altro", "ellipsis-horizontal-circle-outline", "Altro"]]; return <View style={[styles.bottomNav, { backgroundColor: colors.surfaceSecondary, borderTopColor: colors.border }]}>{items.map(([key, icon, label]) => <Pressable testID={`nav-${key}`} key={key} onPress={() => setArea(key)} style={styles.navItem}><Ionicons name={icon} size={22} color={area === key ? colors.brand : colors.muted} /><Text style={{ color: area === key ? colors.brand : colors.muted, fontSize: 11, fontWeight: "900", marginTop: 4 }}>{label}</Text></Pressable>)}</View>; }
+function BottomNav({ area, setArea, colors, admin }: { area: Area; setArea: (area: Area) => void; colors: ReturnType<typeof useTheme>["colors"]; admin: boolean }) { const items: [Area, keyof typeof Ionicons.glyphMap, string][] = [["oggi", "grid-outline", "Oggi"], ["ricettario", "book-outline", "Ricette"], ["produzione", "git-branch-outline", "Produzione"], ["altro", "ellipsis-horizontal-circle-outline", "Altro"], ...(admin ? [["impostazioni", "settings-outline", "Impostazioni"] as [Area, keyof typeof Ionicons.glyphMap, string]] : [])]; return <View style={[styles.bottomNav, { backgroundColor: colors.surfaceSecondary, borderTopColor: colors.border }]}>{items.map(([key, icon, label]) => <Pressable testID={`nav-${key}`} key={key} onPress={() => setArea(key)} style={styles.navItem}><Ionicons name={icon} size={22} color={area === key ? colors.brand : colors.muted} /><Text style={{ color: area === key ? colors.brand : colors.muted, fontSize: 11, fontWeight: "900", marginTop: 4 }}>{label}</Text></Pressable>)}</View>; }
 
 const styles = StyleSheet.create({
   root: { flex: 1 }, operatorDropdownWrap: { paddingTop: 8 }, operatorDropdown: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingHorizontal: 12, flexDirection: "row", alignItems: "center", gap: 6 }, operatorMenu: { borderWidth: 1, borderRadius: 12, marginTop: 6, overflow: "hidden" }, operatorMenuItem: { minHeight: 46, paddingHorizontal: 14, borderBottomWidth: 1, flexDirection: "row", alignItems: "center" }, starterAlert: { borderRadius: 15, padding: 15, flexDirection: "row", gap: 11, alignItems: "center" }, flourNotice: { borderRadius: 14, borderWidth: 1, padding: 12, flexDirection: "row", gap: 10, alignItems: "flex-start", marginBottom: 16 }, feedMobileCard: { borderRadius: 12, padding: 12, marginBottom: 8 }, feedMobileTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }, feedMobileGrid: { flexDirection: "row", flexWrap: "wrap", marginTop: 8, rowGap: 8 }, feedMobileCell: { width: "50%" }, archivePreview: { borderRadius: 12, padding: 12, gap: 6 }, archiveStats: { flexDirection: "row", gap: 6, marginVertical: 6 }, archiveStat: { flex: 1 }, archiveRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6, borderBottomWidth: 1 }, groupLabel: { fontSize: 10, fontWeight: "900", letterSpacing: 1, marginBottom: 8 }, noteSign: { fontSize: 10, fontWeight: "700", marginTop: 4 }, operatorRow: { gap: 6, paddingTop: 8, alignItems: "center", flexDirection: "row", flexWrap: "wrap" }, operatorLabel: { flexDirection: "row", alignItems: "center", gap: 4, marginRight: 2 }, operatorChip: { minHeight: 34, paddingHorizontal: 10, borderRadius: 999, borderWidth: 1, flexDirection: "row", alignItems: "center", gap: 4 }, feedTableHead: { flexDirection: "row", marginTop: 16, paddingBottom: 6, borderBottomWidth: 1 }, feedTableRow: { paddingVertical: 9, borderBottomWidth: 1 }, feedTableCells: { flexDirection: "row", alignItems: "center" }, feedCell: { flex: 1, fontSize: 11 }, appShell: { flex: 1, width: "100%", alignSelf: "center" }, scrollContent: { paddingTop: 14, paddingBottom: 26 }, loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }, loadingText: { fontSize: 14, fontWeight: "700" }, header: { paddingHorizontal: 20, paddingBottom: 12 }, brandRow: { flexDirection: "row", alignItems: "center", gap: 11 }, captionRow: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 3, flexWrap: "wrap" }, headerActions: { flexDirection: "row", alignItems: "center", gap: 6 }, logo: { width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center" }, appName: { fontSize: 18, fontWeight: "900", letterSpacing: -0.4 }, appCaption: { fontSize: 11 }, syncBadge: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999 }, syncBadgeText: { fontSize: 10, fontWeight: "900", letterSpacing: 0.2 }, modeSwitch: { minHeight: 36, maxWidth: 140, borderRadius: 11, paddingHorizontal: 8, flexDirection: "row", gap: 5, alignItems: "center", borderWidth: 1 }, modeLabel: { fontSize: 11, fontWeight: "800", flexShrink: 1 }, modeOptions: { gap: 7, paddingTop: 12 }, modeOption: { paddingHorizontal: 11, paddingVertical: 8, borderRadius: 999 }, modeOptionText: { fontSize: 11, fontWeight: "800" }, welcomeRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 22, gap: 10 }, eyebrowLarge: { fontSize: 11, fontWeight: "900", letterSpacing: 1.2, marginBottom: 5 }, pageTitle: { fontSize: 29, fontWeight: "900", letterSpacing: -1 }, pageSubtitle: { fontSize: 13, lineHeight: 19, marginTop: 5 }, liveBadge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7, flexDirection: "row", alignItems: "center", gap: 5 }, liveDot: { width: 6, height: 6, borderRadius: 6, backgroundColor: "#FFFFFF" }, kpiGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 18 }, kpiGridTablet: { flexWrap: "nowrap" }, cardIntro: { fontSize: 13, lineHeight: 19, marginBottom: 14 }, chipsRow: { gap: 8, paddingBottom: 12 }, smallChips: { gap: 6 }, filterChip: { minHeight: 36, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, alignItems: "center", justifyContent: "center" }, composer: { borderRadius: 13, padding: 10, marginBottom: 10 }, noteInput: { minHeight: 68, borderWidth: 1, borderRadius: 10, padding: 11, textAlignVertical: "top", fontSize: 13 }, composerOptions: { gap: 8, marginTop: 8 }, primaryButton: { minHeight: 44, borderRadius: 11, paddingHorizontal: 13, flexDirection: "row", alignItems: "center", gap: 7, alignSelf: "flex-start" }, noteRow: { minHeight: 70, paddingVertical: 11, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 9 }, noteMarker: { width: 5, height: 40, borderRadius: 4 }, noteBody: { flex: 1, minWidth: 0 }, noteMeta: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 5 }, noteShift: { fontSize: 12, fontWeight: "900" }, noteTime: { fontSize: 11 }, noteText: { fontSize: 13, lineHeight: 18 }, empty: { paddingVertical: 16, fontSize: 13 }, scheduleHeader: { flexDirection: "row", justifyContent: "space-between", paddingBottom: 7 }, tableLabel: { fontSize: 10, fontWeight: "900", letterSpacing: 0.7, flex: 1 }, scheduleRow: { flexDirection: "row", alignItems: "center", paddingVertical: 13, borderTopWidth: 1, gap: 8 }, scheduleTime: { flex: 1 }, timeText: { fontWeight: "900", fontSize: 13 }, ovenText: { fontSize: 10, marginTop: 3 }, scheduleProduct: { flex: 1.2, fontSize: 12, fontWeight: "800" }, alertBanner: { borderRadius: 15, padding: 15, flexDirection: "row", gap: 11, alignItems: "center", marginBottom: 16 }, alertTitle: { fontWeight: "900", fontSize: 13 }, alertText: { fontSize: 12, marginTop: 3, lineHeight: 17 }, pageIntro: { marginBottom: 22 }, recipeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 }, recipeCardTablet: { width: "48.8%" }, recipeTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 7 }, recipeYield: { fontSize: 11, flexShrink: 1, textAlign: "right" }, recipeName: { fontSize: 17, fontWeight: "900", lineHeight: 22, marginTop: 13, minHeight: 44 }, recipeStats: { flexDirection: "row", gap: 10, marginTop: 18, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#E2E8F0" }, recipeActions: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 16 }, outlineButton: { minHeight: 44, borderWidth: 1, borderRadius: 11, paddingHorizontal: 11, flexDirection: "row", alignItems: "center", gap: 6 }, outlineButtonText: { fontSize: 12, fontWeight: "800" }, calculatorRow: { flexDirection: "row", alignItems: "flex-end", gap: 10, marginBottom: 12 }, field: { flex: 1, minWidth: 110 }, fieldLabel: { fontSize: 11, fontWeight: "800", marginBottom: 6 }, fieldInput: { height: 44, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, fontSize: 14, fontWeight: "800" }, resultBox: { minWidth: 106, borderRadius: 10, padding: 8, height: 64, justifyContent: "center" }, resultLabel: { fontSize: 10, fontWeight: "800" }, resultValue: { fontSize: 20, fontWeight: "900", marginTop: 2 }, ingredientRow: { flexDirection: "row", alignItems: "center", minHeight: 44, borderBottomWidth: 1, gap: 8 }, ingredientName: { flex: 1, fontSize: 13 }, ingredientPercent: { width: 42, fontSize: 11, textAlign: "right" }, ingredientGrams: { width: 84, fontSize: 13, fontWeight: "900", textAlign: "right" }, methodNote: { marginTop: 13, fontSize: 12, lineHeight: 18 }, inputGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 16 }, tempResult: { borderRadius: 14, minHeight: 76, padding: 15, flexDirection: "row", alignItems: "center", gap: 11 }, tempLabel: { fontSize: 13, fontWeight: "900" }, tempFormula: { fontSize: 11, marginTop: 4 }, tempValue: { fontSize: 28, fontWeight: "900" }, modalBackdrop: { flex: 1, justifyContent: "flex-end" }, labelSheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "92%" }, modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }, modalTitle: { fontSize: 24, fontWeight: "900" }, labelPreview: { borderWidth: 1, borderRadius: 14, padding: 18, marginBottom: 13 }, labelBrand: { fontSize: 12, fontWeight: "900", letterSpacing: 1.5 }, labelProduct: { fontSize: 19, fontWeight: "900", marginTop: 10, lineHeight: 24 }, labelSmall: { fontSize: 10, fontWeight: "800", letterSpacing: 0.5, marginTop: 18, lineHeight: 14 }, labelIngredients: { fontSize: 14, lineHeight: 21, marginTop: 6 }, allergenLegend: { borderRadius: 9, padding: 10, flexDirection: "row", gap: 8, alignItems: "center", marginTop: 15 }, kanbanRow: { gap: 10, paddingBottom: 4 }, kanbanColumn: { borderRadius: 14, padding: 10, minHeight: 190 }, kanbanHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }, kanbanTitle: { fontSize: 12, fontWeight: "900" }, countBadge: { width: 24, height: 24, borderRadius: 8, alignItems: "center", justifyContent: "center" }, batchCard: { borderWidth: 1, borderRadius: 11, padding: 11, marginBottom: 8 }, batchName: { fontSize: 13, lineHeight: 17, fontWeight: "900" }, batchQty: { fontSize: 11, marginTop: 5 }, timerRow: { flexDirection: "row", gap: 5, alignItems: "center", marginTop: 11 }, batchActions: { flexDirection: "row", gap: 6, marginTop: 10, flexWrap: "wrap" }, advanceButton: { minHeight: 32, borderRadius: 8, paddingHorizontal: 9, flexDirection: "row", gap: 4, alignItems: "center" }, traceButton: { minHeight: 32, borderRadius: 8, paddingHorizontal: 8, flexDirection: "row", gap: 4, alignItems: "center", borderWidth: 1 }, twoColumns: { flexDirection: "row", gap: 10 }, columnCard: { flex: 1 }, starterHero: { flexDirection: "row", alignItems: "center", gap: 10 }, starterIcon: { width: 44, height: 44, borderRadius: 13, alignItems: "center", justifyContent: "center" }, starterTitle: { fontWeight: "900", fontSize: 15, marginBottom: 4 }, feedRow: { borderTopWidth: 1, marginTop: 15, paddingTop: 14, flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }, timerItem: { marginBottom: 18 }, timerItemTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8, gap: 8 }, progressTrack: { height: 8, borderRadius: 8, overflow: "hidden" }, progressFill: { height: "100%", borderRadius: 8 }, subnav: { flexDirection: "row", borderRadius: 12, padding: 4, gap: 3, marginBottom: 16 }, subnavItem: { flex: 1, minHeight: 40, borderRadius: 9, alignItems: "center", justifyContent: "center" }, stockRow: { minHeight: 67, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 9 }, stockIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" }, stockName: { fontSize: 12, fontWeight: "800", marginBottom: 3 }, stockQty: { alignItems: "flex-end" }, tempLog: { minHeight: 63, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 10 }, tempCheck: { width: 30, height: 30, borderRadius: 10, alignItems: "center", justifyContent: "center" }, complianceFooter: { borderRadius: 10, padding: 10, flexDirection: "row", gap: 8, marginTop: 13, alignItems: "center" }, returnRow: { minHeight: 65, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 10 }, returnIcon: { width: 35, height: 35, borderRadius: 10, alignItems: "center", justifyContent: "center" }, suggestion: { borderRadius: 12, padding: 12, flexDirection: "row", gap: 9, marginTop: 14 }, marginRow: { minHeight: 48, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 4, fontSize: 12 }, chartLegend: { flexDirection: "row", gap: 18, marginBottom: 12 }, legendItem: { flexDirection: "row", alignItems: "center", gap: 5 }, legendDot: { width: 8, height: 8, borderRadius: 8 }, chart: { height: 170, flexDirection: "row", alignItems: "flex-end", gap: 7, borderBottomWidth: 1, borderLeftWidth: 1, paddingHorizontal: 10 }, barGroup: { flex: 1, height: "100%", flexDirection: "row", alignItems: "flex-end", gap: 2 }, bar: { flex: 1, borderTopLeftRadius: 4, borderTopRightRadius: 4, minHeight: 5 }, chartLabels: { flexDirection: "row", justifyContent: "space-between", paddingTop: 8 }, flourRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 }, flourTrack: { flex: 1, height: 10, borderRadius: 5, overflow: "hidden" }, flourFill: { height: "100%", borderRadius: 5 }, traceCard: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12, borderBottomWidth: 1 }, traceHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }, traceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 7 }, traceLabel: { fontSize: 10, fontWeight: "900", letterSpacing: 0.6 }, traceValue: { fontSize: 13, fontWeight: "800" }, traceIngredient: { paddingVertical: 10, borderBottomWidth: 1, flexDirection: "row", alignItems: "center", gap: 10 }, traceIngName: { fontSize: 13, fontWeight: "800" }, traceIngLot: { fontSize: 11, marginTop: 3 }, traceIngPct: { fontSize: 12, fontWeight: "900" }, signatureRow: { flexDirection: "row", borderTopWidth: 1, marginTop: 18, paddingTop: 15, gap: 20 }, signatureCell: { flex: 1 }, signatureLine: { height: 1, marginTop: 24 }, iconButton: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" }, bottomNav: { borderTopWidth: 1, minHeight: 68, flexDirection: "row", paddingHorizontal: 8 }, navItem: { flex: 1, alignItems: "center", justifyContent: "center", minHeight: 64 },
